@@ -1,5 +1,8 @@
-.vs
+.vs/
 *.sln
+.git/
+.github/
+.vscode/
 DerivedDataCache/
 Intermediate/
 Saved/
