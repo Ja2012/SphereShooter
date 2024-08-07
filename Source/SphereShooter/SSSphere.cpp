@@ -1,27 +1,50 @@
-// Sphere Shooter by Evgeny Grigoryev. Check "License.MD" file.
-
-
 #include "SSSphere.h"
+#include "Components/SphereComponent.h"
+#include "DrawDebugHelpers.h"
 
-// Sets default values
 ASSSphere::ASSSphere()
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
+	SphereCollisionComponent = CreateDefaultSubobject<USphereComponent>("SphereCollisionComponent");
+    SphereCollisionComponent->SetSimulatePhysics(true);
+    SphereCollisionComponent->SetCollisionProfileName(UCollisionProfile::PhysicsActor_ProfileName);
+    // no friction so we can roll indefinitely 
+    SphereCollisionComponent->SetLinearDamping(0.f);
+    SphereCollisionComponent->SetAngularDamping(0.f);
+    // gravity allow us to use angular impulse.
+    SphereCollisionComponent->SetEnableGravity(true);
+    SphereCollisionComponent->SetPhysicsMaxAngularVelocityInDegrees(100000.f);
+
+    StaticMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>("StaticMeshComponent");
+    StaticMeshComponent->SetSimulatePhysics(false);
+    StaticMeshComponent->SetCollisionProfileName(UCollisionProfile::NoCollision_ProfileName);
+
+    SetRootComponent(SphereCollisionComponent);
+    StaticMeshComponent->SetupAttachment(SphereCollisionComponent);
+
 }
 
-// Called when the game starts or when spawned
-void ASSSphere::BeginPlay()
+void ASSSphere::Roll() 
 {
-	Super::BeginPlay();
-	
+    SphereCollisionComponent->AddAngularImpulseInDegrees(FVector(0.f, RollImpulseValue, 0.f), NAME_None, true);
 }
 
-// Called every frame
-void ASSSphere::Tick(float DeltaTime)
+void ASSSphere::BeginPlay() 
 {
-	Super::Tick(DeltaTime);
+    Super::BeginPlay();
 
+    // to roll only in XY plane (see BeginPlay).
+    FBodyInstance* BodyInstance = SphereCollisionComponent->GetBodyInstance();
+    BodyInstance->bLockZTranslation = true;
+    BodyInstance->SetDOFLock(EDOFMode::SixDOF);
 }
+
+void ASSSphere::Tick(float DeltaTime) 
+{
+    Super::Tick(DeltaTime);
+    GEngine->AddOnScreenDebugMessage(1, 0.f, FColor::Red, FString::Printf(TEXT("Roll ball velocity: %s"), *GetVelocity().ToCompactString()));
+    
+}
+
 

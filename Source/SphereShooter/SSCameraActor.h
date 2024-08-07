@@ -1,5 +1,3 @@
-// Sphere Shooter by Evgeny Grigoryev. Check "License.MD" file.
-
 #pragma once
 
 #include "CoreMinimal.h"
