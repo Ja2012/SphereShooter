@@ -25,17 +25,33 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "01|Input") 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AAA") 
 	class UInputMappingContext* InputMappingContext;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "01|Input")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AAA")
 	class UInputAction* ShootAction;
 
 	UFUNCTION()
 	void Shoot(const FInputActionValue& Value);
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "01|Components")
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AAA")
+	class UInputAction* MouseMove;
+
+	UFUNCTION()
+	void MoveMouse(const FInputActionValue& Value);
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AAA")
 	class UCameraComponent* CameraComponent;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AAA")
+    class USceneComponent* SceneComponent;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AAA")
+    class UNiagaraSystem* NiagaraSystemBeam;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AAA")
+    class UNiagaraComponent* NiagaraComponent;
 
 private:
     UPROPERTY()

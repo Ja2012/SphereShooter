@@ -8,7 +8,16 @@ public class SphereShooter : ModuleRules
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 	
-		PublicDependencyModuleNames.AddRange(new string[] { "EnhancedInput", "Core", "CoreUObject", "Engine", "InputCore" });
+		PublicDependencyModuleNames.AddRange(new string[]
+		{
+			"EnhancedInput",
+			"Core",
+			"CoreUObject", 
+			"Engine",
+			"InputCore",
+            "Niagara",
+        }
+        );
 
 		PrivateDependencyModuleNames.AddRange(new string[] {  });
 
