@@ -11,7 +11,7 @@ class SPHERESHOOTER_API ASSSphere : public AActor
 
 public:
     ASSSphere();
-    void Roll();
+    void Roll(FVector Direction);
     virtual void BeginPlay() override;
     virtual void Tick(float DeltaTime) override;
 

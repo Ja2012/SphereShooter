@@ -20,7 +20,7 @@ public:
     virtual void PawnClientRestart() override;
     void SetRollBall(ASSSphere* Ball);
     ASSSphere* GetRollBall() const { return CurrentRollBoll; }
-    void Roll();
+    void Roll(FVector Direction);
 
 protected:
 	virtual void BeginPlay() override;
@@ -34,9 +34,11 @@ protected:
 	UFUNCTION()
 	void Shoot(const FInputActionValue& Value);
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AAA")
+	float ShootScaleImpulse = 1000.f;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AAA")
-	class UInputAction* MouseMove;
+	class UInputAction* MouseMoveAction;
 
 	UFUNCTION()
 	void MoveMouse(const FInputActionValue& Value);

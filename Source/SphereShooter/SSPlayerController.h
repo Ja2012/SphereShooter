@@ -8,4 +8,7 @@ UCLASS()
 class SPHERESHOOTER_API ASSPlayerController : public APlayerController
 {
     GENERATED_BODY()
+
+public:
+    ASSPlayerController();
 };

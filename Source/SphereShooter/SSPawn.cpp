@@ -35,19 +35,13 @@ void ASSPawn::BeginPlay()
 void ASSPawn::Shoot(const FInputActionValue& Value)
 {
     UE_LOG(ASSPawnLogCategory, Warning, TEXT("Shoot"));
-    Roll();
+    Roll(NiagaraComponent->GetForwardVector() * ShootScaleImpulse);
 }
 
 void ASSPawn::MoveMouse(const FInputActionValue& Value) 
 {
-    //UE_LOG(ASSPawnLogCategory, Warning, TEXT("MoveMouse"));
-    FVector2D MousePos = Value.Get<FVector2D>();
-
-
-    //UE_LOG(ASSPawnLogCategory, Warning, TEXT("Mouse coordinates %s"), *MousePos.ToString());
-    //FRotator Rot;
-    //MousePos.
-    //NiagaraComponent->rota;
+    float MouseXDelta = Value.Get<float>();
+    NiagaraComponent->AddRelativeRotation(FRotator(0.f, MouseXDelta, 0.f));
 }
 
 // Called every frame
@@ -64,7 +58,7 @@ void ASSPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
     if(UEnhancedInputComponent* Input = Cast<UEnhancedInputComponent>(PlayerInputComponent))
     {
         Input->BindAction(ShootAction, ETriggerEvent::Triggered, this, &ASSPawn::Shoot);
-        Input->BindAction(MouseMove, ETriggerEvent::Triggered, this, &ASSPawn::MoveMouse);
+        Input->BindAction(MouseMoveAction, ETriggerEvent::Triggered, this, &ASSPawn::MoveMouse);
     }
 }
 
@@ -87,7 +81,7 @@ void ASSPawn::SetRollBall(ASSSphere* Ball)
     CurrentRollBoll = Ball;
 }
 
-void ASSPawn::Roll() 
+void ASSPawn::Roll(FVector Direction) 
 {
-    CurrentRollBoll->Roll();
+    CurrentRollBoll->Roll(Direction);
 }

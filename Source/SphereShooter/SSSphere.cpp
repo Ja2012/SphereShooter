@@ -25,9 +25,11 @@ ASSSphere::ASSSphere()
 
 }
 
-void ASSSphere::Roll() 
+void ASSSphere::Roll(FVector Direction)
 {
-    SphereCollisionComponent->AddAngularImpulseInDegrees(FVector(0.f, RollImpulseValue, 0.f), NAME_None, true);
+    //SphereCollisionComponent->AddAngularImpulseInDegrees(FVector(0.f, RollImpulseValue, 0.f), NAME_None, true);
+    if (!SphereCollisionComponent) return;
+    SphereCollisionComponent->AddImpulse(Direction, NAME_None, true);
 }
 
 void ASSSphere::BeginPlay() 
