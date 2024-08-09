@@ -14,12 +14,16 @@ public:
     virtual void BeginPlay() override;
 
 protected:
-    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "01")
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AAA")
     TSubclassOf<class ASSSphere> RollBallClass;
 
-    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "01")
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AAA")
     FVector PlayerBallLoc;
 
-    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "01")
+    // from UE Editor by default (usually 100)
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AAA")
+    float BallSizeDefault = 100.f;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AAA")
     float BallSize = 50.f;
 };

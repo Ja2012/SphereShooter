@@ -1,28 +1,24 @@
 #include "SSSphere.h"
 #include "Components/SphereComponent.h"
-#include "DrawDebugHelpers.h"
 
 ASSSphere::ASSSphere()
 {
-	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bCanEverTick = false;
 
 	SphereCollisionComponent = CreateDefaultSubobject<USphereComponent>("SphereCollisionComponent");
-    SphereCollisionComponent->SetSimulatePhysics(true);
+    SetRootComponent(SphereCollisionComponent);
     SphereCollisionComponent->SetCollisionProfileName(UCollisionProfile::PhysicsActor_ProfileName);
+
     // no friction so we can roll indefinitely 
     SphereCollisionComponent->SetLinearDamping(0.f);
     SphereCollisionComponent->SetAngularDamping(0.f);
-    // gravity allow us to use angular impulse.
-    SphereCollisionComponent->SetEnableGravity(true);
-    SphereCollisionComponent->SetPhysicsMaxAngularVelocityInDegrees(100000.f);
 
     StaticMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>("StaticMeshComponent");
+    StaticMeshComponent->SetupAttachment(SphereCollisionComponent);
     StaticMeshComponent->SetSimulatePhysics(false);
     StaticMeshComponent->SetCollisionProfileName(UCollisionProfile::NoCollision_ProfileName);
 
-    SetRootComponent(SphereCollisionComponent);
-    StaticMeshComponent->SetupAttachment(SphereCollisionComponent);
-
+    TurnIntoGridBall();
 }
 
 void ASSSphere::Roll(FVector Direction)
@@ -32,11 +28,23 @@ void ASSSphere::Roll(FVector Direction)
     SphereCollisionComponent->AddImpulse(Direction, NAME_None, true);
 }
 
+void ASSSphere::TurnIntoRollBall() 
+{
+    PrimaryActorTick.bCanEverTick = true;
+    SphereCollisionComponent->SetSimulatePhysics(true);
+}
+
+void ASSSphere::TurnIntoGridBall() 
+{
+    PrimaryActorTick.bCanEverTick = false;
+    SphereCollisionComponent->SetSimulatePhysics(false);
+}
+
 void ASSSphere::BeginPlay() 
 {
     Super::BeginPlay();
 
-    // to roll only in XY plane (see BeginPlay).
+    // to roll only in XY plane
     FBodyInstance* BodyInstance = SphereCollisionComponent->GetBodyInstance();
     BodyInstance->bLockZTranslation = true;
     BodyInstance->SetDOFLock(EDOFMode::SixDOF);

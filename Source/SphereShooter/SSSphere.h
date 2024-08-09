@@ -11,17 +11,19 @@ class SPHERESHOOTER_API ASSSphere : public AActor
 
 public:
     ASSSphere();
-    void Roll(FVector Direction);
     virtual void BeginPlay() override;
     virtual void Tick(float DeltaTime) override;
-
+    void TurnIntoRollBall();
+    void TurnIntoGridBall();
+    void Roll(FVector Direction);
+    
 protected:
-    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AAA")
     class USphereComponent* SphereCollisionComponent;
 
-    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AAA")
     class UStaticMeshComponent* StaticMeshComponent;
 
-    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "01")
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AAA")
     float RollImpulseValue;
 };
