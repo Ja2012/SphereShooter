@@ -7,6 +7,7 @@
 #include "Components/SceneComponent.h"
 #include "NiagaraComponent.h"
 #include "SSPlayerController.h"
+#include "SSGameLevelGameMode.h"
 
 DEFINE_LOG_CATEGORY_STATIC(ASSPawnLogCategory, All, All)
 
@@ -23,7 +24,8 @@ ASSPawn::ASSPawn()
     CameraComponent->bUsePawnControlRotation = true;
     CameraComponent->SetupAttachment(SceneComponent);
 
-
+    AimBeamNiagaraComponent = CreateDefaultSubobject<UNiagaraComponent>("NiagaraComponent");
+    AimBeamNiagaraComponent->SetupAttachment(SceneComponent);
 }
 
 // Called when the game starts or when spawned
@@ -31,7 +33,14 @@ void ASSPawn::BeginPlay()
 {
     Super::BeginPlay();
 
-    PlayerController = Cast<ASSPlayerController>(GetController());
+    PlayerController = Cast<ASSPlayerController>(GetController());    
+    GameMode = Cast<ASSGameLevelGameMode>(GetWorld()->GetAuthGameMode());
+
+    FVector NiagaraLocation = GameMode->PlayerBallPositionMarkActor->GetActorLocation();
+    NiagaraLocation.Z = 1;
+    AimBeamNiagaraComponent->SetWorldLocation(NiagaraLocation);
+    AimBeamNiagaraComponent->SetNiagaraVariableVec3(AimBeamLengthVarName, AimBeamLengthVarValue);
+    AimBeamNiagaraComponent->SetAsset(AimBeamNiagaraSystem);
 }
 
 void ASSPawn::ShootRollBall(const FInputActionValue& Value)

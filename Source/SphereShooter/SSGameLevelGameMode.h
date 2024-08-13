@@ -16,9 +16,6 @@ public:
     UPROPERTY()
     AActor* PlayerBallPositionMarkActor;
 
-    UPROPERTY()
-    class UNiagaraComponent* AimBeamNiagaraComponent;
-
 protected:
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AAA")
     TSubclassOf<class ASSSphere> RollBallClass;
@@ -34,15 +31,4 @@ protected:
     // tag of scene actor that point to player roll ball start position
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AAA")
     FName PlayerBallPositionMarkActorTag = "PlayerBallXYLocation";
-
-    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AAA|AimBeam")
-    class UNiagaraSystem* AimBeamNiagaraSystem;
-
-    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AAA|AimBeam")
-    FString AimBeamLengthVarName = "BeamLength";
-
-    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AAA|AimBeam")
-    FVector AimBeamLengthVarValue;
-
-    void SpawnAimBeam();
 };

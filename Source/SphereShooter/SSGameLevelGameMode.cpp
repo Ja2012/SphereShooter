@@ -3,8 +3,6 @@
 #include "SSPlayerController.h"
 #include "SSSphere.h"
 #include "Kismet/GameplayStatics.h"
-#include "NiagaraFunctionLibrary.h"
-#include "NiagaraComponent.h"
 
 ASSGameLevelGameMode::ASSGameLevelGameMode() 
 {
@@ -32,18 +30,7 @@ void ASSGameLevelGameMode::BeginPlay()
 
     ASSSphere* RollBall = GetWorld()->SpawnActorDeferred<ASSSphere>(RollBallClass, SpawnTransform);
     
-    SpawnAimBeam();
-
     RollBall->TurnIntoRollBall();
     RollBall->FinishSpawning(SpawnTransform);
     Pawn->SetRollBall(RollBall);
-    Pawn->AimBeamNiagaraComponent = AimBeamNiagaraComponent;
-}
-
-void ASSGameLevelGameMode::SpawnAimBeam()
-{
-    FVector AimBeamStartLocation(PlayerBallPositionMarkActor->GetActorLocation());
-    AimBeamStartLocation.Z = 1;
-    AimBeamNiagaraComponent = UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), AimBeamNiagaraSystem, AimBeamStartLocation);
-    AimBeamNiagaraComponent->SetNiagaraVariableVec3(AimBeamLengthVarName, AimBeamLengthVarValue);
 }

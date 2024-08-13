@@ -24,11 +24,12 @@ public:
 
     void Roll(FVector Impulse);
 
-    UPROPERTY()
-    class UNiagaraComponent* AimBeamNiagaraComponent;
 
 protected:
 	virtual void BeginPlay() override;
+
+	UPROPERTY()
+    class ASSGameLevelGameMode* GameMode;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AAA|Input") 
 	class UInputMappingContext* InputMappingContext;
@@ -48,12 +49,23 @@ protected:
 	UFUNCTION()
 	void MoveAimBeam(const FInputActionValue& Value);
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AAA|Components")
+	UPROPERTY()
 	class UCameraComponent* CameraComponent;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AAA|Components")
+	UPROPERTY()
     class USceneComponent* SceneComponent;
 
+    UPROPERTY()
+    class UNiagaraComponent* AimBeamNiagaraComponent;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AAA|AimBeam")
+    class UNiagaraSystem* AimBeamNiagaraSystem;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AAA|AimBeam")
+    FString AimBeamLengthVarName = "AimBeamLength";
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AAA|AimBeam")
+    FVector AimBeamLengthVarValue;
 
 private:
     UPROPERTY()
