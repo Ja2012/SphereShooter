@@ -9,10 +9,6 @@ ASSSphere::ASSSphere()
     SetRootComponent(SphereCollisionComponent);
     SphereCollisionComponent->SetCollisionProfileName(UCollisionProfile::PhysicsActor_ProfileName);
 
-    // no friction so we can roll indefinitely 
-    SphereCollisionComponent->SetLinearDamping(0.f);
-    SphereCollisionComponent->SetAngularDamping(0.f);
-
     StaticMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>("StaticMeshComponent");
     StaticMeshComponent->SetupAttachment(SphereCollisionComponent);
     StaticMeshComponent->SetSimulatePhysics(false);
@@ -21,17 +17,21 @@ ASSSphere::ASSSphere()
     TurnIntoGridBall();
 }
 
-void ASSSphere::Roll(FVector Direction)
+void ASSSphere::Roll(FVector Impulse)
 {
     //SphereCollisionComponent->AddAngularImpulseInDegrees(FVector(0.f, RollImpulseValue, 0.f), NAME_None, true);
     if (!SphereCollisionComponent) return;
-    SphereCollisionComponent->AddImpulse(Direction, NAME_None, true);
+    SphereCollisionComponent->AddImpulse(Impulse, NAME_None, true);
 }
 
 void ASSSphere::TurnIntoRollBall() 
 {
     PrimaryActorTick.bCanEverTick = true;
     SphereCollisionComponent->SetSimulatePhysics(true);
+
+    // no friction so we can roll indefinitely 
+    SphereCollisionComponent->SetLinearDamping(0.f);
+    SphereCollisionComponent->SetAngularDamping(0.f);
 }
 
 void ASSSphere::TurnIntoGridBall() 
@@ -44,7 +44,6 @@ void ASSSphere::BeginPlay()
 {
     Super::BeginPlay();
 
-    // to roll only in XY plane
     FBodyInstance* BodyInstance = SphereCollisionComponent->GetBodyInstance();
     BodyInstance->bLockZTranslation = true;
     BodyInstance->SetDOFLock(EDOFMode::SixDOF);
@@ -53,7 +52,7 @@ void ASSSphere::BeginPlay()
 void ASSSphere::Tick(float DeltaTime) 
 {
     Super::Tick(DeltaTime);
-    GEngine->AddOnScreenDebugMessage(1, 0.f, FColor::Red, FString::Printf(TEXT("Roll ball velocity: %s"), *GetVelocity().ToCompactString()));
+    GEngine->AddOnScreenDebugMessage(1, 0.f, FColor::Red, FString::Printf(TEXT("Roll ball velocity: %s"), *GetVelocity().ToCompactString()), false);
     
 }
 

@@ -15,7 +15,7 @@ public:
     virtual void Tick(float DeltaTime) override;
     void TurnIntoRollBall();
     void TurnIntoGridBall();
-    void Roll(FVector Direction);
+    void Roll(FVector Impulse);
     
 protected:
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AAA")

@@ -2,47 +2,48 @@
 #include "SSPawn.h"
 #include "SSPlayerController.h"
 #include "SSSphere.h"
+#include "Kismet/GameplayStatics.h"
+#include "NiagaraFunctionLibrary.h"
+#include "NiagaraComponent.h"
 
 ASSGameLevelGameMode::ASSGameLevelGameMode() 
 {
 
     DefaultPawnClass =  ASSPawn::StaticClass();
 	PlayerControllerClass = ASSPlayerController::StaticClass();
-
 }
 
 void ASSGameLevelGameMode::BeginPlay()
 {
     Super::BeginPlay();
 
-    if (!GetWorld()) return;
+    TArray<AActor*> Array;
+    UGameplayStatics::GetAllActorsWithTag(this, PlayerBallPositionMarkActorTag, Array);
+    checkf(Array.Num() != 0, TEXT("No actor with tag %s"), *PlayerBallPositionMarkActorTag.ToString());
+    PlayerBallPositionMarkActor = Array[0];
 
     APlayerController* PC = GetWorld()->GetFirstPlayerController<APlayerController>();
-    if (!PC) return;
-
     ASSPawn* Pawn = Cast<ASSPawn>(PC->GetPawn());
-    if (!Pawn) return;
 
-    // set location for RollBoll so it lay firmly on zero plane    
-    //ASSSphere* RollBall = GetWorld()->SpawnActor<ASSSphere>(RollBallClass, //
-    //    FTransform(FVector(PlayerBallLoc.X, PlayerBallLoc.Y, BallSize / 2.f)) //
-    //);
-
+    FVector PlayerBallXYLoc = PlayerBallPositionMarkActor->GetActorLocation();
     float BallScale = BallSize / BallSizeDefault;
-    FTransform SpawnTransform { FRotator::ZeroRotator, FVector(PlayerBallLoc.X, PlayerBallLoc.Y, BallSize / 2.f), //
+    FTransform SpawnTransform{FRotator::ZeroRotator, FVector(PlayerBallXYLoc.X, PlayerBallXYLoc.Y, BallSize / 2.f),  //
         FVector(BallScale, BallScale, BallScale)};
 
-    //ASSSphere* RollBall = GetWorld()->SpawnActor<ASSSphere>(RollBallClass, SpawnTransform);
     ASSSphere* RollBall = GetWorld()->SpawnActorDeferred<ASSSphere>(RollBallClass, SpawnTransform);
-    if (!RollBall) return;
     
+    SpawnAimBeam();
+
     RollBall->TurnIntoRollBall();
     RollBall->FinishSpawning(SpawnTransform);
-    
-
-
-
-
-
     Pawn->SetRollBall(RollBall);
+    Pawn->AimBeamNiagaraComponent = AimBeamNiagaraComponent;
+}
+
+void ASSGameLevelGameMode::SpawnAimBeam()
+{
+    FVector AimBeamStartLocation(PlayerBallPositionMarkActor->GetActorLocation());
+    AimBeamStartLocation.Z = 1;
+    AimBeamNiagaraComponent = UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), AimBeamNiagaraSystem, AimBeamStartLocation);
+    AimBeamNiagaraComponent->SetNiagaraVariableVec3(AimBeamLengthVarName, AimBeamLengthVarValue);
 }

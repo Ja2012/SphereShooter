@@ -13,12 +13,15 @@ public:
     ASSGameLevelGameMode();
     virtual void BeginPlay() override;
 
+    UPROPERTY()
+    AActor* PlayerBallPositionMarkActor;
+
+    UPROPERTY()
+    class UNiagaraComponent* AimBeamNiagaraComponent;
+
 protected:
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AAA")
     TSubclassOf<class ASSSphere> RollBallClass;
-
-    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AAA")
-    FVector PlayerBallLoc;
 
     // from UE Editor by default (usually 100)
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AAA")
@@ -26,4 +29,19 @@ protected:
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AAA")
     float BallSize = 50.f;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AAA")
+    FName PlayerBallPositionMarkActorTag = "PlayerBallXYLocation";
+
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AAA|AimBeam")
+    class UNiagaraSystem* AimBeamNiagaraSystem;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AAA|AimBeam")
+    FString AimBeamLengthVarName = "BeamLength";
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AAA|AimBeam")
+    FVector AimBeamLengthVarValue;
+
+    void SpawnAimBeam();
 };
