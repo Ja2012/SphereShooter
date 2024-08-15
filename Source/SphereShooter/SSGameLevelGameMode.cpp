@@ -53,10 +53,11 @@ void ASSGameLevelGameMode::SetBallsGrid()
     const float BallScale = BallSize / BallSizeDefault;
     for (FTile& Tile : Tiles)
     {
+        if (Tile.bIsOutOfRightEdge) continue;
         const FTransform SpawnTransform{FRotator::ZeroRotator, Tile.Location,  //
             FVector(BallScale, BallScale, BallScale)};
         ASSSphere* Ball = GetWorld()->SpawnActorDeferred<ASSSphere>(BallClass, SpawnTransform);        
         Ball->FinishSpawning(SpawnTransform);
-        Tile.Sphere = Ball;
+        Tile.Ball = Ball;
     }
 }

@@ -26,9 +26,9 @@ void ASSGrid::GenerateGrid(TArray<FTile>& Tiles) const
     const float GridWidth = (-1.f) * GridStartLoc.Y * 2.f;
     const float GridHeight = R + Rows * (R + R / 2.f) + R;
 
-    const uint8 Columns = uint8(GridWidth / TileWidth);
+    const uint8 ColumnsQuantity = uint8(GridWidth / TileWidth);
 
-    Tiles.Reserve(Columns * Rows);
+    Tiles.Reserve(ColumnsQuantity * Rows);
 
     float TileCenterX = 0.f;
     float TileCenterY = 0.f;
@@ -36,18 +36,34 @@ void ASSGrid::GenerateGrid(TArray<FTile>& Tiles) const
     FVector TileCenter;
     for (uint8 Row = 0; Row < Rows; ++Row)
     {
-        for (uint8 Column = 0; Column < Columns; ++Column)
+        for (uint8 Column = 0; Column < ColumnsQuantity; ++Column)
         {
-            if (Row % 2 == 1 && Column == Columns - 1) continue;
             // rows go from left -Y to right +Y
             TileCenterY = Row % 2 ? GridStartLoc.Y + TileWidth + TileWidth * Column : GridStartLoc.Y + r + TileWidth * Column;
             // columns go from "up" +X to "down" -X
             TileCenterX = GridStartLoc.X - R - (Row * 3.f * R / 2.f);
             TileCenter = FVector(TileCenterX, TileCenterY, TileCenterZ);
-            Tiles.Emplace(FTile(Row * Columns + Column, TileCenter));
+            Tiles.Emplace(FTile(Row * ColumnsQuantity + Column, TileCenter, Row, Column, //
+                Row % 2 == 1 && Column == ColumnsQuantity - 1 ? true : false));
         }
     }
-    UE_LOG(ASSGridLog, Display, TEXT("Grid %dx%d generated, %d tiles"), Rows, Columns, Rows * Columns);
+
+    // set tile neighbours
+    for (uint8 Row = 0; Row < Rows; ++Row)
+    {
+        for (uint8 Column = 0; Column < ColumnsQuantity; ++Column)
+        {
+            FTile& Tile = Tiles[Row * ColumnsQuantity + Column];
+            if (Tile.bIsOutOfRightEdge) continue;
+            SetValidNeighbor(Tiles, Tile, &FTile::TL, ColumnsQuantity);
+            SetValidNeighbor(Tiles, Tile, &FTile::TR, ColumnsQuantity);
+            SetValidNeighbor(Tiles, Tile, &FTile::L, ColumnsQuantity);
+            SetValidNeighbor(Tiles, Tile, &FTile::R, ColumnsQuantity);
+            SetValidNeighbor(Tiles, Tile, &FTile::BL, ColumnsQuantity);
+            SetValidNeighbor(Tiles, Tile, &FTile::BR, ColumnsQuantity);
+        }
+    }
+    UE_LOG(ASSGridLog, Display, TEXT("Grid %dx%d generated, %d tiles"), Rows, ColumnsQuantity, Rows * ColumnsQuantity);
 }
 
 // Called when the game starts or when spawned
@@ -56,4 +72,40 @@ void ASSGrid::BeginPlay()
     Super::BeginPlay();
 
     checkf(Rows, TEXT("Zero rows in Grid"));
+}
+
+void ASSGrid::SetValidNeighbor(TArray<FTile>& Tiles, FTile& Tile, const FTileMemberPtr TileMemberPtr, const uint8 ColumnsQuantity) const
+{
+
+    uint32 ID;
+    if (TileMemberPtr == &FTile::TL)
+    {
+        ID = RowColumnToID(ColumnsQuantity, Tile.Row - 1, Tile.Column);
+    }
+    else if (TileMemberPtr == &FTile::TR)
+    {
+        ID = RowColumnToID(ColumnsQuantity, Tile.Row - 1, Tile.Column + 1);
+    }
+    else if (TileMemberPtr == &FTile::L)
+    {
+        ID = RowColumnToID(ColumnsQuantity, Tile.Row, Tile.Column - 1);
+    }
+    else if (TileMemberPtr == &FTile::R)
+    {
+        ID = RowColumnToID(ColumnsQuantity, Tile.Row, Tile.Column + 1);
+    }
+    else if (TileMemberPtr == &FTile::BL)
+    {
+        ID = RowColumnToID(ColumnsQuantity, Tile.Row + 1, Tile.Column);
+    }
+    else
+    {
+        ID = RowColumnToID(ColumnsQuantity, Tile.Row + 1, Tile.Column + 1);
+    }
+    if (!Tiles.IsValidIndex(ID))
+    {
+        Tile.*TileMemberPtr = nullptr;
+        return;
+    };
+    Tile.*TileMemberPtr = &Tiles[ID];
 }
