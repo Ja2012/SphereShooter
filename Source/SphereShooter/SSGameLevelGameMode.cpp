@@ -3,6 +3,7 @@
 #include "SSPlayerController.h"
 #include "SSSphere.h"
 #include "Kismet/GameplayStatics.h"
+#include "SSGrid.h"
 
 ASSGameLevelGameMode::ASSGameLevelGameMode() 
 {
@@ -15,22 +16,47 @@ void ASSGameLevelGameMode::BeginPlay()
 {
     Super::BeginPlay();
 
+    SetRollBall();
+
+    SetBallsGrid();
+}
+
+void ASSGameLevelGameMode::SetRollBall() 
+{
+    const APlayerController* PlayerController = GetWorld()->GetFirstPlayerController<APlayerController>();
+    ASSPawn* Pawn = Cast<ASSPawn>(PlayerController->GetPawn());
+    
+    // find roll ball start position
     TArray<AActor*> Array;
     UGameplayStatics::GetAllActorsWithTag(this, PlayerBallPositionMarkActorTag, Array);
     checkf(Array.Num() != 0, TEXT("No actor with tag %s"), *PlayerBallPositionMarkActorTag.ToString());
-    PlayerBallPositionMarkActor = Array[0];
+    PlayerBallPositionMarker = Array[0];
+    const FVector PlayerBallXYLoc = PlayerBallPositionMarker->GetActorLocation();
 
-    APlayerController* PC = GetWorld()->GetFirstPlayerController<APlayerController>();
-    ASSPawn* Pawn = Cast<ASSPawn>(PC->GetPawn());
-
-    FVector PlayerBallXYLoc = PlayerBallPositionMarkActor->GetActorLocation();
-    float BallScale = BallSize / BallSizeDefault;
-    FTransform SpawnTransform{FRotator::ZeroRotator, FVector(PlayerBallXYLoc.X, PlayerBallXYLoc.Y, BallSize / 2.f),  //
+    // spawn
+    const float BallScale = BallSize / BallSizeDefault;
+    const FTransform SpawnTransform{FRotator::ZeroRotator, FVector(PlayerBallXYLoc.X, PlayerBallXYLoc.Y, BallSize / 2.f),  //
         FVector(BallScale, BallScale, BallScale)};
+    ASSSphere* RollBall = GetWorld()->SpawnActorDeferred<ASSSphere>(BallClass, SpawnTransform);
 
-    ASSSphere* RollBall = GetWorld()->SpawnActorDeferred<ASSSphere>(RollBallClass, SpawnTransform);
-    
     RollBall->TurnIntoRollBall();
     RollBall->FinishSpawning(SpawnTransform);
     Pawn->SetRollBall(RollBall);
+}
+
+void ASSGameLevelGameMode::SetBallsGrid() 
+{
+    const ASSGrid* Grid = Cast<ASSGrid>(UGameplayStatics::GetActorOfClass(this, ASSGrid::StaticClass()));
+    checkf(Grid, TEXT("No ASSGrid actor on scene"));
+
+    Grid->GenerateGrid(Tiles);
+    const float BallScale = BallSize / BallSizeDefault;
+    for (FTile& Tile : Tiles)
+    {
+        const FTransform SpawnTransform{FRotator::ZeroRotator, Tile.Location,  //
+            FVector(BallScale, BallScale, BallScale)};
+        ASSSphere* Ball = GetWorld()->SpawnActorDeferred<ASSSphere>(BallClass, SpawnTransform);        
+        Ball->FinishSpawning(SpawnTransform);
+        Tile.Sphere = Ball;
+    }
 }

@@ -36,7 +36,7 @@ void ASSPawn::BeginPlay()
     PlayerController = Cast<ASSPlayerController>(GetController());    
     GameMode = Cast<ASSGameLevelGameMode>(GetWorld()->GetAuthGameMode());
 
-    FVector NiagaraLocation = GameMode->PlayerBallPositionMarkActor->GetActorLocation();
+    FVector NiagaraLocation = GameMode->GetPlayerBallPositionMarker()->GetActorLocation();
     NiagaraLocation.Z = 1;
     AimBeamNiagaraComponent->SetWorldLocation(NiagaraLocation);
     AimBeamNiagaraComponent->SetNiagaraVariableVec3(AimBeamLengthVarName, AimBeamLengthVarValue);

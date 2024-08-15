@@ -13,14 +13,15 @@ public:
     ASSGameLevelGameMode();
     virtual void BeginPlay() override;
 
-    UPROPERTY()
-    AActor* PlayerBallPositionMarkActor;
+    float GetBallSize() const { return BallSize; };
+    AActor* GetPlayerBallPositionMarker() { return PlayerBallPositionMarker; };
 
 protected:
-    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AAA")
-    TSubclassOf<class ASSSphere> RollBallClass;
+    UPROPERTY()
+    AActor* PlayerBallPositionMarker;
 
     // from UE Editor by default (usually 100)
+    // TODO: Delete and remake with mesh bounding box
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AAA")
     float BallSizeDefault = 100.f;
 
@@ -28,7 +29,16 @@ protected:
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AAA")
     float BallSize = 50.f;
 
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AAA")
+    TSubclassOf<class ASSSphere> BallClass;
+
     // tag of scene actor that point to player roll ball start position
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AAA")
     FName PlayerBallPositionMarkActorTag = "PlayerBallXYLocation";
+
+    void SetRollBall();
+    void SetBallsGrid();
+    
+    UPROPERTY()
+    TArray<struct FTile> Tiles;
 };

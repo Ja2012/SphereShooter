@@ -12,7 +12,6 @@ class SPHERESHOOTER_API ASSSphere : public AActor
 public:
     ASSSphere();
     virtual void BeginPlay() override;
-    virtual void Tick(float DeltaTime) override;
     void TurnIntoRollBall();
     void TurnIntoGridBall();
     void Roll(FVector Impulse);

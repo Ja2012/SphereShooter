@@ -49,11 +49,5 @@ void ASSSphere::BeginPlay()
     BodyInstance->SetDOFLock(EDOFMode::SixDOF);
 }
 
-void ASSSphere::Tick(float DeltaTime) 
-{
-    Super::Tick(DeltaTime);
-    GEngine->AddOnScreenDebugMessage(1, 0.f, FColor::Red, FString::Printf(TEXT("Roll ball velocity: %s"), *GetVelocity().ToCompactString()), false);
-    
-}
 
 
