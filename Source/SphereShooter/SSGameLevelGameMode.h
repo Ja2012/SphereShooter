@@ -2,7 +2,10 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameModeBase.h"
+#include "SSGrid.h"
 #include "SSGameLevelGameMode.generated.h"
+
+struct FTile;
 
 UCLASS()
 class SPHERESHOOTER_API ASSGameLevelGameMode : public AGameModeBase
@@ -39,6 +42,5 @@ protected:
     void SetRollBall();
     void SetBallsGrid();
     
-    UPROPERTY()
-    TArray<struct FTile> Tiles;
+    TArray<FTile> Tiles;
 };

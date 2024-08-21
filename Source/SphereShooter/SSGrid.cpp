@@ -43,8 +43,8 @@ void ASSGrid::GenerateGrid(TArray<FTile>& Tiles) const
             // columns go from "up" +X to "down" -X
             TileCenterX = GridStartLoc.X - R - (Row * 3.f * R / 2.f);
             TileCenter = FVector(TileCenterX, TileCenterY, TileCenterZ);
-            Tiles.Emplace(FTile(Row * ColumnsQuantity + Column, TileCenter, Row, Column, //
-                Row % 2 == 1 && Column == ColumnsQuantity - 1 ? true : false));
+            Tiles.Emplace(Row * ColumnsQuantity + Column, TileCenter, Row, Column, //
+                Row % 2 == 1 && Column == ColumnsQuantity - 1 ? true : false);
         }
     }
 
@@ -102,6 +102,7 @@ void ASSGrid::SetValidNeighbor(TArray<FTile>& Tiles, FTile& Tile, const FTileMem
     {
         ID = RowColumnToID(ColumnsQuantity, Tile.Row + 1, Tile.Column + 1);
     }
+
     if (!Tiles.IsValidIndex(ID))
     {
         Tile.*TileMemberPtr = nullptr;

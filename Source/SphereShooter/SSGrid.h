@@ -3,25 +3,22 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/Actor.h"
 #include "SSGrid.generated.h"
 
 /**
  * Point top regular hexagon
  */
-USTRUCT()
 struct FTile
 {
-    GENERATED_USTRUCT_BODY()
-
-    FTile(){};
     FTile(uint32 ID, FVector Location, uint8 Row, uint8 Column, bool bIsOutOfRightEdge = false)
-        : ID(ID), Location(Location), Row(Row), Column(Column), bIsOutOfRightEdge(bIsOutOfRightEdge) {}
+        : ID(ID), Location(Location), Row(Row), Column(Column), bIsOutOfRightEdge(bIsOutOfRightEdge){}
 
-    uint32 ID = 0;
-    uint8 Row;
-    uint8 Column;
-    FVector Location;
+    uint32 ID{0};
+    FVector Location{0, 0, 0};
+    uint8 Row{0};
+    uint8 Column{0};
+    TWeakObjectPtr<class ASSSphere> Ball = nullptr;
+    bool bIsOutOfRightEdge = false;
 
     FTile* L = nullptr;
     FTile* R = nullptr;
@@ -29,11 +26,6 @@ struct FTile
     FTile* TR = nullptr;
     FTile* BL = nullptr;
     FTile* BR = nullptr;
-
-    UPROPERTY()
-    TWeakObjectPtr<class ASSSphere> Ball;
-
-    bool bIsOutOfRightEdge = false;
 };
 
 /**
