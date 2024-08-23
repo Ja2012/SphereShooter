@@ -3,6 +3,7 @@
 #include "SSPlayerController.h"
 #include "SSSphere.h"
 #include "Kismet/GameplayStatics.h"
+#include "SSGrid.h"
 
 ASSGameLevelGameMode::ASSGameLevelGameMode() 
 {

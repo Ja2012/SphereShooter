@@ -2,10 +2,8 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameModeBase.h"
-#include "SSGrid.h"
+#include "Tile.h"
 #include "SSGameLevelGameMode.generated.h"
-
-struct FTile;
 
 UCLASS()
 class SPHERESHOOTER_API ASSGameLevelGameMode : public AGameModeBase
