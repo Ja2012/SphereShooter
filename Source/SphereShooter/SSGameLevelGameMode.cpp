@@ -1,6 +1,5 @@
 #include "SSGameLevelGameMode.h"
 #include "SSPawn.h"
-#include "SSPlayerController.h"
 #include "SSSphere.h"
 #include "Kismet/GameplayStatics.h"
 #include "SSGrid.h"
@@ -9,7 +8,7 @@ ASSGameLevelGameMode::ASSGameLevelGameMode()
 {
 
     DefaultPawnClass =  ASSPawn::StaticClass();
-	PlayerControllerClass = ASSPlayerController::StaticClass();
+	PlayerControllerClass = APlayerController::StaticClass();
 }
 
 void ASSGameLevelGameMode::BeginPlay()

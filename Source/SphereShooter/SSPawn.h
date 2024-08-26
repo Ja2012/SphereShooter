@@ -71,5 +71,5 @@ private:
     UPROPERTY()
     ASSSphere* CurrentRollBoll;
 
-	class ASSPlayerController* PlayerController;
+	APlayerController* PlayerController;
 };

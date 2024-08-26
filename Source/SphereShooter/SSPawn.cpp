@@ -6,7 +6,6 @@
 #include "SSSphere.h"
 #include "Components/SceneComponent.h"
 #include "NiagaraComponent.h"
-#include "SSPlayerController.h"
 #include "SSGameLevelGameMode.h"
 
 DEFINE_LOG_CATEGORY_STATIC(ASSPawnLogCategory, All, All)
@@ -33,7 +32,7 @@ void ASSPawn::BeginPlay()
 {
     Super::BeginPlay();
 
-    PlayerController = Cast<ASSPlayerController>(GetController());    
+    PlayerController = Cast<APlayerController>(GetController());    
     GameMode = Cast<ASSGameLevelGameMode>(GetWorld()->GetAuthGameMode());
 
     FVector NiagaraLocation = GameMode->GetPlayerBallPositionMarker()->GetActorLocation();

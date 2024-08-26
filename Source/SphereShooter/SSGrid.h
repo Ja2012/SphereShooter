@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Tile.h"
+#include "SSTile.h"
 #include "SSGrid.generated.h"
 
 

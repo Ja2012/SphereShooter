@@ -2,7 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameModeBase.h"
-#include "Tile.h"
+#include "SSTile.h"
 #include "SSGameLevelGameMode.generated.h"
 
 UCLASS()
