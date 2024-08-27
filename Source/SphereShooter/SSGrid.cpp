@@ -2,6 +2,7 @@
 
 #include "SSGrid.h"
 #include "SSGameLevelGameMode.h"
+#include "BallType.h"
 
 DEFINE_LOG_CATEGORY_STATIC(ASSGridLog, All, All);
 
@@ -14,7 +15,7 @@ ASSGrid::ASSGrid()
 void ASSGrid::GenerateGrid(TArray<FTile>& Tiles) const
 {
     const FVector GridStartLoc = GetActorLocation();
-    const float BallSize = Cast<ASSGameLevelGameMode>(GetWorld()->GetAuthGameMode())->GetBallSize();
+    const float BallSize = Cast<ASSGameLevelGameMode>(GetWorld()->GetAuthGameMode())->GetBallType()->MeshDiameter;
 
     const float TileWidth = BallSize;
     // r is horizontal small radius (Inradius) in point top regular hexagon

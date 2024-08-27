@@ -5,6 +5,8 @@
 #include "SSTile.h"
 #include "SSGameLevelGameMode.generated.h"
 
+class UBallType;
+
 UCLASS()
 class SPHERESHOOTER_API ASSGameLevelGameMode : public AGameModeBase
 {
@@ -14,31 +16,29 @@ public:
     ASSGameLevelGameMode();
     virtual void BeginPlay() override;
 
-    float GetBallSize() const { return BallSize; };
-    AActor* GetPlayerBallPositionMarker() { return PlayerBallPositionMarker; };
+    FVector GetPlayerBallLocation() { return PlayerBallLocation; };
+    TObjectPtr<UBallType> GetBallType() { return BallType; }
 
 protected:
-    UPROPERTY()
-    AActor* PlayerBallPositionMarker;
+    void Init();
+    void FindPlayerBallStartPosition();
 
-    // from UE Editor by default (usually 100)
-    // TODO: Delete and remake with mesh bounding box
-    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AAA")
-    float BallSizeDefault = 100.f;
+    FVector PlayerBallLocation;
 
-    // all game balls size 
-    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AAA")
-    float BallSize = 50.f;
-
-    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AAA")
-    TSubclassOf<class ASSSphere> BallClass;
+    TSoftObjectPtr<UBallType> BallTypeSoftPtr;
+    TObjectPtr<UBallType> BallType;
 
     // tag of scene actor that point to player roll ball start position
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AAA")
     FName PlayerBallPositionMarkActorTag = "PlayerBallXYLocation";
 
+    void LoadBallTypeDataAsset();
+    void OnLoadBallTypeDataAsset();
+
+    void SetBallCDO();
     void SetRollBall();
     void SetBallsGrid();
-    
+
     TArray<FTile> Tiles;
+
 };

@@ -16,13 +16,14 @@ public:
     void TurnIntoGridBall();
     void Roll(FVector Impulse);
     
-protected:
-    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AAA")
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AAA")
     class USphereComponent* SphereCollisionComponent;
-
-    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AAA")
+    
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AAA")
     class UStaticMeshComponent* StaticMeshComponent;
-
+    
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AAA")
     float RollImpulseValue;
+
+
 };
