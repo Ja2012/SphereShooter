@@ -3,6 +3,8 @@
 #include "CoreMinimal.h"
 #include "GameFramework/GameModeBase.h"
 #include "SSTile.h"
+#include "SSColor.h"
+
 #include "SSGameLevelGameMode.generated.h"
 
 class UBallType;
@@ -29,7 +31,7 @@ protected:
     TObjectPtr<UBallType> BallType;
 
     // tag of scene actor that point to player roll ball start position
-    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AAA")
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Ball", meta = (DisplayPriority = "1"))
     FName PlayerBallPositionMarkActorTag = "PlayerBallXYLocation";
 
     void LoadBallTypeDataAsset();
@@ -40,5 +42,4 @@ protected:
     void SetBallsGrid();
 
     TArray<FTile> Tiles;
-
 };

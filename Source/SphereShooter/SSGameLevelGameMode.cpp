@@ -18,6 +18,7 @@ ASSGameLevelGameMode::ASSGameLevelGameMode()
 void ASSGameLevelGameMode::BeginPlay()
 {
     Super::BeginPlay();
+    
     FindPlayerBallStartPosition();
     LoadBallTypeDataAsset();
 }
@@ -61,6 +62,13 @@ void ASSGameLevelGameMode::SetRollBall()
         FRotator::ZeroRotator, FVector(PlayerBallLocation.X, PlayerBallLocation.Y, BallType->MeshDiameter / 2.f), FVector(1.f)};
     ASSSphere* RollBall = GetWorld()->SpawnActorDeferred<ASSSphere>(BallType->SphereClass, SpawnTransform);
     RollBall->TurnIntoRollBall();
+
+    // set random material
+    const ESSColor Color = static_cast<ESSColor>(FMath::RandRange((int64)0, int64(BallType->MaterialInstances.Num() - 1)));
+    RollBall->StaticMeshComponent->SetMaterial(0, BallType->MaterialInstances[Color]);
+    RollBall->Color = Color;
+
+    // finish
     RollBall->FinishSpawning(SpawnTransform);
     Pawn->SetRollBall(RollBall);
 }
@@ -71,12 +79,20 @@ void ASSGameLevelGameMode::SetBallsGrid()
     checkf(Grid, TEXT("No ASSGrid actor on scene"));
     Grid->GenerateGrid(Tiles);
 
+    const int64 MaxForRandom = BallType->MaterialInstances.Num() - 1;
     const FVector Scale{1.f};
     for (FTile& Tile : Tiles)
     {
         if (Tile.bIsOutOfRightEdge) continue;
         const FTransform SpawnTransform{FRotator::ZeroRotator, Tile.Location, Scale};
         ASSSphere* Ball = GetWorld()->SpawnActorDeferred<ASSSphere>(BallType->SphereClass, SpawnTransform);
+
+        // set random material
+        Tile.Color = static_cast<ESSColor>(FMath::RandRange((int64)0, MaxForRandom));
+        Ball->Color = Tile.Color;
+        Ball->StaticMeshComponent->SetMaterial(0, BallType->MaterialInstances[Tile.Color]);
+
+        // finish
         Ball->FinishSpawning(SpawnTransform);
         Tile.Ball = Ball;
     }
@@ -87,8 +103,6 @@ void ASSGameLevelGameMode::SetBallCDO()
     ASSSphere* BallCDO = Cast<ASSSphere>(BallType->SphereClass->GetDefaultObject());
 
     BallCDO->StaticMeshComponent->SetStaticMesh(BallType->Mesh);
-    BallCDO->StaticMeshComponent->SetMaterial(0, BallType->Material);
-
     BallCDO->SphereCollisionComponent->SetSphereRadius(BallType->CollisionDiameter / 2.f);
 
     float MeshScale = (BallType->MeshDiameter / 2.f) / BallType->Mesh->GetBounds().GetSphere().W;

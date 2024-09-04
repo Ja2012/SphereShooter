@@ -4,11 +4,10 @@
 
 #include "CoreMinimal.h"
 #include "Engine/DataAsset.h"
+#include "SSColor.h"
+
 #include "BallType.generated.h"
 
-/**
- *
- */
 UCLASS()
 class SPHERESHOOTER_API UBallType : public UDataAsset
 {
@@ -19,7 +18,7 @@ public:
     TObjectPtr<UStaticMesh> Mesh;
 
     UPROPERTY(EditAnywhere, BlueprintReadOnly)
-    TObjectPtr<UMaterial> Material;
+    TMap<ESSColor, TObjectPtr<UMaterialInstance>> MaterialInstances;
     
     UPROPERTY(EditAnywhere, BlueprintReadOnly)
     TSubclassOf<class ASSSphere> SphereClass;
