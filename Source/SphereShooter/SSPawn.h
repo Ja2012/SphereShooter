@@ -49,20 +49,20 @@ protected:
 	UFUNCTION()
 	void MoveAimBeam(const FInputActionValue& Value);
 
-	UPROPERTY()
+	UPROPERTY(VisibleAnywhere)
 	class UCameraComponent* CameraComponent;
 
-	UPROPERTY()
+	UPROPERTY(VisibleAnywhere)
     class USceneComponent* SceneComponent;
 
-    UPROPERTY()
+    UPROPERTY(VisibleAnywhere)
     class UNiagaraComponent* AimBeamNiagaraComponent;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AAA|AimBeam")
     class UNiagaraSystem* AimBeamNiagaraSystem;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AAA|AimBeam")
-    FString AimBeamLengthVarName = "AimBeamLength";
+    FName AimBeamLengthVarName = "AimBeamLength";
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AAA|AimBeam")
     FVector AimBeamLengthVarValue;

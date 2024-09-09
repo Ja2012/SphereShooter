@@ -20,11 +20,8 @@ ASSGameLevelGameMode::ASSGameLevelGameMode()
 void ASSGameLevelGameMode::BeginPlay()
 {
     Super::BeginPlay();
-
     PlayerController = GetWorld()->GetFirstPlayerController<APlayerController>();
     Pawn = Cast<ASSPawn>(PlayerController->GetPawn());
-
-    FindPlayerBallStartPosition();
     LoadBallTypeDataAsset();
 
 }
@@ -36,12 +33,12 @@ void ASSGameLevelGameMode::Init()
     SetBallsGrid();
 }
 
-void ASSGameLevelGameMode::FindPlayerBallStartPosition()
+FVector ASSGameLevelGameMode::FindPlayerBallStartPosition() const
 {
     TArray<AActor*> Array;
     UGameplayStatics::GetAllActorsWithTag(this, PlayerBallPositionMarkActorTag, Array);
     checkf(Array.Num() != 0, TEXT("No actor with tag %s"), *PlayerBallPositionMarkActorTag.ToString());
-    PlayerBallLocation = Array[0]->GetActorLocation();
+    return Array[0]->GetActorLocation();
 }
 
 void ASSGameLevelGameMode::LoadBallTypeDataAsset()
@@ -61,6 +58,7 @@ void ASSGameLevelGameMode::OnLoadBallTypeDataAsset()
 
 void ASSGameLevelGameMode::SetupRollBall() const
 {
+    const FVector PlayerBallLocation = FindPlayerBallStartPosition();
     // spawn
     const FTransform SpawnTransform{
         FRotator::ZeroRotator, FVector(PlayerBallLocation.X, PlayerBallLocation.Y, BallType->MeshDiameter / 2.f), FVector(1.f)};

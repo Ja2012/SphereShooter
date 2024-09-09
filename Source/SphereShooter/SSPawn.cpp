@@ -35,11 +35,11 @@ void ASSPawn::BeginPlay()
     PlayerController = Cast<APlayerController>(GetController());    
     GameMode = Cast<ASSGameLevelGameMode>(GetWorld()->GetAuthGameMode());
 
-    FVector NiagaraLocation = GameMode->GetPlayerBallLocation();
-    NiagaraLocation.Z = 1;
-    AimBeamNiagaraComponent->SetWorldLocation(NiagaraLocation);
-    AimBeamNiagaraComponent->SetNiagaraVariableVec3(AimBeamLengthVarName, AimBeamLengthVarValue);
+    FVector PlayerBallLocation = GameMode->FindPlayerBallStartPosition();
+    PlayerBallLocation.Z += 1;
+    AimBeamNiagaraComponent->SetWorldLocation(PlayerBallLocation);
     AimBeamNiagaraComponent->SetAsset(AimBeamNiagaraSystem);
+    AimBeamNiagaraComponent->SetVariableVec3(AimBeamLengthVarName, AimBeamLengthVarValue);
 }
 
 void ASSPawn::ShootRollBall(const FInputActionValue& Value)

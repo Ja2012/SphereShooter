@@ -17,15 +17,12 @@ class SPHERESHOOTER_API ASSGameLevelGameMode : public AGameModeBase
 public:
     ASSGameLevelGameMode();
     virtual void BeginPlay() override;
-
-    FVector GetPlayerBallLocation() { return PlayerBallLocation; };
-    TObjectPtr<UBallType> GetBallType() { return BallType; }
+    TObjectPtr<UBallType> GetBallType() const { return BallType; }
+    FVector FindPlayerBallStartPosition() const;
 
 protected:
     void Init();
-    void FindPlayerBallStartPosition();
 
-    FVector PlayerBallLocation;
     UPROPERTY()
     ASSGrid* Grid;
 
