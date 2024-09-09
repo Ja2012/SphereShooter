@@ -12,10 +12,12 @@ ASSGrid::ASSGrid()
     PrimaryActorTick.bCanEverTick = false;
 }
 
-void ASSGrid::GenerateGrid(TArray<FTile>& Tiles) const
+void ASSGrid::GenerateGrid()
 {
+    ASSGameLevelGameMode* GM = Cast<ASSGameLevelGameMode>(GetWorld()->GetAuthGameMode());
+    const float BallSize = GM->GetBallType()->MeshDiameter;
+    const FVector PlayerBallLocation = GM->GetPlayerBallLocation();
     const FVector GridStartLoc = GetActorLocation();
-    const float BallSize = Cast<ASSGameLevelGameMode>(GetWorld()->GetAuthGameMode())->GetBallType()->MeshDiameter;
 
     const float TileWidth = BallSize;
     // r is horizontal small radius (Inradius) in point top regular hexagon
@@ -25,84 +27,90 @@ void ASSGrid::GenerateGrid(TArray<FTile>& Tiles) const
     const float TileHeight = 2.f * R;
 
     const float GridWidth = (-1.f) * GridStartLoc.Y * 2.f;
-    const float GridHeight = R + Rows * (R + R / 2.f) + R;
+    const float GridHeight = GridStartLoc.X - PlayerBallLocation.X;
+    // find Rows from GridHeight = R + Rows * (R + R / 2.f) + R;
+    RowsNum = (2.f * (GridHeight - 1.f * R)) / (3.f * R);
 
-    const uint8 ColumnsQuantity = uint8(GridWidth / TileWidth);
+    ColumnsNum = uint8(GridWidth / TileWidth);
 
-    Tiles.Reserve(ColumnsQuantity * Rows);
+    Tiles.Reserve(ColumnsNum * RowsNum);
 
-    float TileCenterX = 0.f;
-    float TileCenterY = 0.f;
-    float TileCenterZ = BallSize / 2.f;
-    FVector TileCenter;
-    for (uint8 Row = 0; Row < Rows; ++Row)
+    const float TileCenterZ = BallSize / 2.f;
+    for (uint8 Row = 0; Row < RowsNum; ++Row)
     {
-        for (uint8 Column = 0; Column < ColumnsQuantity; ++Column)
+        for (uint8 Column = 0; Column < ColumnsNum; ++Column)
         {
             // rows go from left -Y to right +Y
-            TileCenterY = Row % 2 ? GridStartLoc.Y + TileWidth + TileWidth * Column : GridStartLoc.Y + r + TileWidth * Column;
+            const float TileCenterY = Row % 2 ? GridStartLoc.Y + TileWidth + TileWidth * Column : GridStartLoc.Y + r + TileWidth * Column;
             // columns go from "up" +X to "down" -X
-            TileCenterX = GridStartLoc.X - R - (Row * 3.f * R / 2.f);
-            TileCenter = FVector(TileCenterX, TileCenterY, TileCenterZ);
-            Tiles.Emplace(Row * ColumnsQuantity + Column, TileCenter, Row, Column, //
-                Row % 2 == 1 && Column == ColumnsQuantity - 1 ? true : false);
+            const float TileCenterX = GridStartLoc.X - R - (Row * 3.f * R / 2.f);
+            const FVector TileCenter = FVector(TileCenterX, TileCenterY, TileCenterZ);
+            Tiles.Emplace(Row * ColumnsNum + Column, TileCenter, Row, Column, //
+                // make sure that last column in each odd row will be empty (because it is out of right edge of game field)
+                Row % 2 == 1 && Column == ColumnsNum - 1 ? true : false);
+            
+            // TODO debug
+            DrawDebugCrosshairs(GetWorld(), Tiles[RowColumnToID(Row, Column)].Location, FRotator::ZeroRotator, 30, FColor::Red, true, -1,
+                0);
         }
     }
 
     // set tile neighbours
-    for (uint8 Row = 0; Row < Rows; ++Row)
+    for (uint8 Row = 0; Row < RowsNum; ++Row)
     {
-        for (uint8 Column = 0; Column < ColumnsQuantity; ++Column)
+        for (uint8 Column = 0; Column < ColumnsNum; ++Column)
         {
-            FTile& Tile = Tiles[Row * ColumnsQuantity + Column];
+            FTile& Tile = Tiles[Row * ColumnsNum + Column];
             if (Tile.bIsOutOfRightEdge) continue;
-            SetValidNeighbor(Tiles, Tile, &FTile::TL, ColumnsQuantity);
-            SetValidNeighbor(Tiles, Tile, &FTile::TR, ColumnsQuantity);
-            SetValidNeighbor(Tiles, Tile, &FTile::L, ColumnsQuantity);
-            SetValidNeighbor(Tiles, Tile, &FTile::R, ColumnsQuantity);
-            SetValidNeighbor(Tiles, Tile, &FTile::BL, ColumnsQuantity);
-            SetValidNeighbor(Tiles, Tile, &FTile::BR, ColumnsQuantity);
+            SetValidNeighbor(Tile, &FTile::TopLeft);
+            Tile.Neighbors.Add(Tile.TopLeft);
+            SetValidNeighbor(Tile, &FTile::TopRight);
+            Tile.Neighbors.Add(Tile.TopRight);
+            SetValidNeighbor(Tile, &FTile::Left);
+            Tile.Neighbors.Add(Tile.Left);
+            SetValidNeighbor(Tile, &FTile::Right);
+            Tile.Neighbors.Add(Tile.Right);
+            SetValidNeighbor(Tile, &FTile::BottomLeft);
+            Tile.Neighbors.Add(Tile.BottomLeft);
+            SetValidNeighbor(Tile, &FTile::BottomRight);
+            Tile.Neighbors.Add(Tile.BottomRight);
         }
     }
-    UE_LOG(ASSGridLog, Display, TEXT("Grid %dx%d generated, %d tiles"), Rows, ColumnsQuantity, Rows * ColumnsQuantity);
+    UE_LOG(ASSGridLog, Display, TEXT("Grid generated. Rows %d, columns %d, %d tiles, %.2f width, %.2f height"), RowsNum, ColumnsNum,
+        RowsNum * ColumnsNum,
+        GridWidth, GridHeight);
 }
 
-// Called when the game starts or when spawned
-void ASSGrid::BeginPlay()
-{
-    Super::BeginPlay();
-
-    checkf(Rows, TEXT("Zero rows in Grid"));
-}
-
-void ASSGrid::SetValidNeighbor(TArray<FTile>& Tiles, FTile& Tile, const FTileMemberPtr TileMemberPtr, const uint8 ColumnsQuantity) const
+void ASSGrid::SetValidNeighbor(FTile& Tile, const FTileMemberPtr TileMemberPtr)
 {
 
     uint32 ID;
-    if (TileMemberPtr == &FTile::TL)
+    const bool bIsOddRow = Tile.Row % 2 ? true : false;
+    if (TileMemberPtr == &FTile::TopLeft)
     {
-        ID = RowColumnToID(ColumnsQuantity, Tile.Row - 1, Tile.Column);
+        ID = RowColumnToID(Tile.Row - 1, bIsOddRow ? Tile.Column : Tile.Column - 1);
     }
-    else if (TileMemberPtr == &FTile::TR)
+    else if (TileMemberPtr == &FTile::TopRight)
     {
-        ID = RowColumnToID(ColumnsQuantity, Tile.Row - 1, Tile.Column + 1);
+        ID = RowColumnToID(Tile.Row - 1, bIsOddRow ? Tile.Column + 1 : Tile.Column);
     }
-    else if (TileMemberPtr == &FTile::L)
+    else if (TileMemberPtr == &FTile::Left)
     {
-        ID = RowColumnToID(ColumnsQuantity, Tile.Row, Tile.Column - 1);
+        ID = RowColumnToID(Tile.Row, Tile.Column - 1);
     }
-    else if (TileMemberPtr == &FTile::R)
+    else if (TileMemberPtr == &FTile::Right)
     {
-        ID = RowColumnToID(ColumnsQuantity, Tile.Row, Tile.Column + 1);
+        ID = RowColumnToID(Tile.Row, Tile.Column + 1);
     }
-    else if (TileMemberPtr == &FTile::BL)
+    else if (TileMemberPtr == &FTile::BottomLeft)
     {
-        ID = RowColumnToID(ColumnsQuantity, Tile.Row + 1, Tile.Column);
+        ID = RowColumnToID(Tile.Row + 1, bIsOddRow ? Tile.Column : Tile.Column - 1);
     }
-    else
+    else if (TileMemberPtr == &FTile::BottomRight)
     {
-        ID = RowColumnToID(ColumnsQuantity, Tile.Row + 1, Tile.Column + 1);
+        ID = RowColumnToID(Tile.Row + 1, bIsOddRow ? Tile.Column + 1 : Tile.Column);
     }
+    else checkNoEntry();
 
     if (!Tiles.IsValidIndex(ID))
     {

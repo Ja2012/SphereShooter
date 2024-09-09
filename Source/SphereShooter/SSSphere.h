@@ -6,6 +6,8 @@
 
 #include "SSSphere.generated.h"
 
+struct FTile;
+
 UCLASS()
 class SPHERESHOOTER_API ASSSphere : public AActor
 {
@@ -28,4 +30,6 @@ public:
     float RollImpulseValue;
 
     ESSColor Color = ESSColor::ESSC_Green;
+
+    FTile* Tile;
 };

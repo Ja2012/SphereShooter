@@ -19,25 +19,23 @@ class SPHERESHOOTER_API ASSGrid : public AActor
 
 public:
     ASSGrid();
-    void GenerateGrid(TArray<FTile>& Tiles) const;
+    void GenerateGrid();
 
-protected:
-    virtual void BeginPlay() override;
-
-    // Grid will take all space between walls and will have this quantity of rows.
-    // Ball size variable from GameMode will be used.
-    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AAA")
-    uint8 Rows;
-
-    using FTileMemberPtr = FTile* FTile::*;
-    void SetValidNeighbor(TArray<FTile>& Tiles, FTile& Tile, const FTileMemberPtr TileMember, const uint8 ColumnsQuantity) const;
-    void IDToRowColumn(const uint32 ID, const uint8 ColumnsQuantity, uint8& Row, uint8& CurrentColumn) const
+    void IDToRowColumn(const uint32 ID, uint8& OutRow, uint8& OutCurrentColumn) const
     {
-        Row = ID / ColumnsQuantity;
-        CurrentColumn = ID % ColumnsQuantity;
+        OutRow = ID / ColumnsNum;
+        OutCurrentColumn = ID % ColumnsNum;
     }
-    uint32 RowColumnToID(const uint8 ColumnsQuantity, const uint32 Row, const uint8 CurrentColumn) const
+    uint32 RowColumnToID(const uint8 Row, const uint8 CurrentColumn) const
     {
-        return Row * ColumnsQuantity + CurrentColumn;
+        return Row * ColumnsNum + CurrentColumn;
     };
+
+    TArray<FTile> Tiles {};
+    uint8 ColumnsNum = 0;
+    uint8 RowsNum = 0;
+    
+protected:
+    using FTileMemberPtr = FTile* FTile::*;
+    void SetValidNeighbor(FTile& Tile, const FTileMemberPtr TileMember);
 };

@@ -1,6 +1,7 @@
 #pragma once
 #include "CoreMinimal.h"
 #include "SSColor.h"
+#include "SSSphere.h"
 
 /**
  * Point top regular hexagon
@@ -12,18 +13,32 @@ struct FTile
     {
     }
 
+    void Reset()
+    {
+        Ball = nullptr;
+        Color = ESSColor::ESSC_NoColor;
+    }
+    void Set(ASSSphere* InBall)
+    {
+        Ball = InBall;
+        Ball->Tile = this;
+        Color = InBall->Color;
+    }
+
     uint32 ID{0};
     FVector Location{0, 0, 0};
     uint8 Row{0};
     uint8 Column{0};
     TWeakObjectPtr<class ASSSphere> Ball = nullptr;
     bool bIsOutOfRightEdge = false;
-    ESSColor Color = ESSColor::ESSC_Green;
+    ESSColor Color = ESSColor::ESSC_NoColor;
 
-    FTile* L = nullptr;
-    FTile* R = nullptr;
-    FTile* TL = nullptr;
-    FTile* TR = nullptr;
-    FTile* BL = nullptr;
-    FTile* BR = nullptr;
+    FTile* Left = nullptr;
+    FTile* Right = nullptr;
+    FTile* TopLeft = nullptr;
+    FTile* TopRight = nullptr;
+    FTile* BottomLeft = nullptr;
+    FTile* BottomRight = nullptr;
+
+    TArray<FTile*> Neighbors {};
 };

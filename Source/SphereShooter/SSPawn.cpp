@@ -44,7 +44,7 @@ void ASSPawn::BeginPlay()
 
 void ASSPawn::ShootRollBall(const FInputActionValue& Value)
 {
-    if (!AimBeamNiagaraComponent) return;
+    if (!AimBeamNiagaraComponent || !IsValid(CurrentRollBoll)) return;
     Roll(AimBeamNiagaraComponent->GetForwardVector() * ShootScaleImpulse);
 }
 

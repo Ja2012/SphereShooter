@@ -3,10 +3,10 @@
 #include "CoreMinimal.h"
 #include "GameFramework/GameModeBase.h"
 #include "SSTile.h"
-#include "SSColor.h"
 
 #include "SSGameLevelGameMode.generated.h"
 
+class ASSGrid;
 class UBallType;
 
 UCLASS()
@@ -26,20 +26,32 @@ protected:
     void FindPlayerBallStartPosition();
 
     FVector PlayerBallLocation;
+    UPROPERTY()
+    ASSGrid* Grid;
 
     TSoftObjectPtr<UBallType> BallTypeSoftPtr;
     TObjectPtr<UBallType> BallType;
 
     // tag of scene actor that point to player roll ball start position
-    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Ball", meta = (DisplayPriority = "1"))
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Ball", meta = (DisplayPriority = "-1"))
     FName PlayerBallPositionMarkActorTag = "PlayerBallXYLocation";
+    
+    // Grid with balls will take all space between walls and will have this quantity of rows.
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Grid", meta = (DisplayPriority = "-1"))
+    uint8 BallRowsNum = 10;
 
     void LoadBallTypeDataAsset();
     void OnLoadBallTypeDataAsset();
 
-    void SetBallCDO();
-    void SetRollBall();
+    void SetBallCDO() const;
+    void SetupRollBall() const;
     void SetBallsGrid();
 
-    TArray<FTile> Tiles;
+    UFUNCTION()
+    void OnRollBallHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse,
+        const FHitResult& Hit);
+
+    TObjectPtr<class APlayerController> PlayerController;
+    TObjectPtr<class ASSPawn> Pawn;
+
 };

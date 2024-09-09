@@ -28,6 +28,7 @@ void ASSSphere::TurnIntoRollBall()
 {
     PrimaryActorTick.bCanEverTick = true;
     SphereCollisionComponent->SetSimulatePhysics(true);
+    SphereCollisionComponent->SetNotifyRigidBodyCollision(true);
 
     // no friction so we can roll indefinitely 
     SphereCollisionComponent->SetLinearDamping(0.f);
@@ -38,6 +39,8 @@ void ASSSphere::TurnIntoGridBall()
 {
     PrimaryActorTick.bCanEverTick = false;
     SphereCollisionComponent->SetSimulatePhysics(false);
+    SphereCollisionComponent->SetNotifyRigidBodyCollision(false);
+    SphereCollisionComponent->OnComponentHit.Clear();
 }
 
 void ASSSphere::BeginPlay() 
