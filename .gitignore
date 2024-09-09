@@ -3,6 +3,7 @@
 .git/
 .github/
 .vscode/
+.idea/
 DerivedDataCache/
 Intermediate/
 Saved/
