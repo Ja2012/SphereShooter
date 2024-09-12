@@ -34,7 +34,7 @@ public:
     TArray<FTile> Tiles {};
     uint8 ColumnsNum = 0;
     uint8 RowsNum = 0;
-    
+
 protected:
     using FTileMemberPtr = FTile* FTile::*;
     void SetValidNeighbor(FTile& Tile, const FTileMemberPtr TileMember);

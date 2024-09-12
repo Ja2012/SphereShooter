@@ -9,6 +9,9 @@
 #include "Components/SphereComponent.h"
 #include "DrawDebugHelpers.h"
 
+#include <unordered_map>
+#include <unordered_set>
+
 DEFINE_LOG_CATEGORY_STATIC(ASSGameLevelGameModeLog, All, All);
 
 ASSGameLevelGameMode::ASSGameLevelGameMode()
@@ -119,6 +122,7 @@ void ASSGameLevelGameMode::SetBallsGrid()
         Ball->FinishSpawning(SpawnTransform);
 
     }
+    UE_LOG(LogTemp, Display, TEXT("%d balls created for %d rows"), BallRowsNum * Grid->ColumnsNum, BallRowsNum);
 }
 
 void ASSGameLevelGameMode::OnRollBallHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp,
@@ -128,59 +132,62 @@ void ASSGameLevelGameMode::OnRollBallHit(UPrimitiveComponent* HitComponent, AAct
     ASSSphere* RollBall = Cast<ASSSphere>(HitComponent->GetOwner());
     RollBall->TurnIntoGridBall();
     const ASSSphere* GridBall = Cast<ASSSphere>(OtherActor);
+    const double HitNormalYaw = Hit.ImpactNormal.Rotation().Yaw;
 
-    // const double YawAngle = (Hit.ImpactPoint - GridBall->GetActorLocation()).Rotation().Yaw;
-    const double YawAngle = Hit.ImpactNormal.Rotation().Yaw;
-
-    // check if pile of grid balls hangs too low - end game
-    if (GridBall->Tile->Row == Grid->RowsNum - 1 && FMath::Abs(YawAngle) >= 120)
-    {        
+    // check if pile of grid balls hangs too low and player hit it from below - end game
+    if (GridBall->Tile->Row == Grid->RowsNum - 1 && FMath::Abs(HitNormalYaw) >= 120)
+    {
         // TODO make game over
         UE_LOG(ASSGameLevelGameModeLog, Display, TEXT("Game Over"));
         RollBall->Destroy();
         return;
     }
-    
-    
+
     // TODO debug
-    UE_LOG(LogTemp, Display, TEXT("YawAngle %.2f"), YawAngle);
+    UE_LOG(LogTemp, Display, TEXT("HitYaw %.2f"), HitNormalYaw);
     DrawDebugDirectionalArrow(GetWorld(), Hit.ImpactPoint, Hit.ImpactPoint + Hit.ImpactNormal * 100.f, BallType->MeshDiameter,
         FColor::White, false, 5, -1,
         3);
 
-    FVector RollBallLoc = Hit.ImpactPoint;
+    // find GridBall neighbours and sort them in ascending distance to GridBall
+    FVector HitPointLoc = Hit.ImpactPoint;
     TArray<FTile*> GridBallTileNeighbours;
     Algo::CopyIf(GridBall->Tile->Neighbors, GridBallTileNeighbours, [](const FTile* NeighbourTile) { return NeighbourTile != nullptr; });
-    Algo::Sort(GridBallTileNeighbours, [&RollBallLoc](const FTile* A, const FTile* B)
+    Algo::Sort(GridBallTileNeighbours, [&HitPointLoc](const FTile* A, const FTile* B)
     {
-        return (A->Location - RollBallLoc).Length() > (B->Location - RollBallLoc).Length();
+        return (A->Location - HitPointLoc).Length() < (B->Location - HitPointLoc).Length();
     });
 
-    // tile where roll ball should land
-    FTile* Tile = nullptr;  
+    // find most close empty tile to land 
+    FTile* TileToLand = nullptr;
     for (FTile* NeighbourTile : GridBallTileNeighbours)
     {
-        if (NeighbourTile->Ball == nullptr) { Tile = NeighbourTile; }
+        if (NeighbourTile->Empty())
+        {
+            TileToLand = NeighbourTile;
+            break;
+        }
     }
-    checkf(Tile, TEXT("All tiles around GridBall with color %s are busy"), *UEnum::GetValueAsString(GridBall->Color));
     
-    // check bound values - we don't put roll ball outside right edge - no can do
-    if (YawAngle > 0 && Tile && Tile->bIsOutOfRightEdge)
+    // edge cases
+    // left
+    if (HitNormalYaw < 0 && GridBall->Tile->Column == 0 && GridBall->Tile->Row % 2 == 0)
     {
-        Tile = GridBall->Tile->Row % 2 == 0 ? GridBall->Tile->BottomLeft : GridBall->Tile->BottomRight;
+        TileToLand = GridBall->Tile->BottomRight;
+        UE_LOG(LogTemp, Display, TEXT("left edge shift"));
+    }
+    // right
+    else if (HitNormalYaw > 0 && TileToLand && TileToLand->bIsOutOfRightEdge)
+    {
+        TileToLand = GridBall->Tile->Row % 2 == 0 ? GridBall->Tile->BottomLeft : GridBall->Tile->BottomRight;
         UE_LOG(LogTemp, Display, TEXT("right edge shift"));
     }
-    // check bound values - do not put roll ball outside left edge - no can do
-    else if (YawAngle < 0 && GridBall->Tile->Column == 0 && GridBall->Tile->Row % 2 == 0)
-    {
-        Tile = GridBall->Tile->BottomRight;
-        UE_LOG(LogTemp, Display, TEXT("left edge shift"));
+    
+    checkf(TileToLand->Ball == nullptr, TEXT("Landing tile is not empty"));
 
-    }
-    checkf(Tile->Ball == nullptr, TEXT("Landing tile is not empty"));
-
-    RollBall->SetActorLocation(Tile->Location, false, nullptr, ETeleportType::ResetPhysics);
-    Tile->Set(RollBall);
+    // Landing
+    RollBall->SetActorLocation(TileToLand->Location, false, nullptr, ETeleportType::ResetPhysics);
+    TileToLand->Set(RollBall);
 
     // TODO debug
     // UE_LOG(ASSGameLevelGameModeLog, Display, TEXT("GridBall row %d, col %d, loc %s"), GridBall->Tile->Row, GridBall->Tile->Column,
@@ -190,20 +197,101 @@ void ASSGameLevelGameMode::OnRollBallHit(UPrimitiveComponent* HitComponent, AAct
     // UE_LOG(ASSGameLevelGameModeLog, Display, TEXT("RollBall row %d, col %d, loc %s\n"), RollBall->Tile->Row, RollBall->Tile->Column,
     //     *RollBall->Tile->Location.ToString());
 
-    bool bIsSameColor = false;
-    for (FTile* NeighborTile : Tile->Neighbors)
+    // check if hit same color
+    std::unordered_set<FTile*> StrikeTiles{};
+    GetSameColorConnectedTiles(TileToLand, StrikeTiles);
+
+    if (StrikeTiles.size() > 1)
     {
-        if (!NeighborTile || NeighborTile->Color != RollBall->Color) continue;
-        NeighborTile->Ball->Destroy();
-        NeighborTile->Reset();
-        bIsSameColor = true;
-    }
-    if (bIsSameColor)
-    {
-        RollBall->Destroy();
-        Tile->Reset();
+        // TODO here come code to count win points for strikes / VFX? 
+        uint8 StrikeCount = StrikeTiles.size();
+        UE_LOG(LogTemp, Display, TEXT("STRIKE!!! %d balls"), StrikeCount);
+
+        // find strike neighbours and then destroy strike 
+        std::unordered_set<FTile*> StrikeNeighborTiles{};
+        for (FTile* StrikeTile : StrikeTiles)
+        {
+            for (FTile* NeighbourTile : StrikeTile->Neighbors)
+            {
+                if (!NeighbourTile || NeighbourTile->Empty() || StrikeTiles.contains(NeighbourTile) || StrikeNeighborTiles.contains(
+                        NeighbourTile))
+                    continue;
+                StrikeNeighborTiles.insert(NeighbourTile);
+            }
+            if (ASSSphere* Ball = StrikeTile->Ball.Get()) Ball->Destroy();
+            StrikeTile->Reset();
+        }
+
+        // look for flying balls, destroy and then repeat, so that we don't overuse Greedy Best First Search Algorithm (IsTileConnectedToGrid)
+        std::unordered_set<FTile*> TilesToDrop{};
+        uint8 DropCount = 0;
+        // for (uint16 i = 0; i < StrikeNeighborTiles.size(); ++i)
+        for (std::unordered_set<FTile*>::iterator Iter = StrikeNeighborTiles.begin(), IteratorEnd = StrikeNeighborTiles.end();
+             Iter != IteratorEnd; ++Iter)
+        {
+            if (FTile* NeighbourTile = *Iter)
+            {
+
+                // We don't need check grid connection for every NeighbourTile, because there is neighbour of neighbour.
+                // optimize so again, we don't overuse Greedy Best First Search Algorithm (IsTileConnectedToGrid)
+                std::unordered_set<FTile*>::iterator NextIter = std::next(Iter);
+                if (NextIter != IteratorEnd && (*NextIter)->Neighbors.contains(NeighbourTile)) continue;
+
+                if (!IsTileConnectedToGrid(NeighbourTile))
+                {
+                    GetTilesNotConnectedToGrid(NeighbourTile, TilesToDrop);
+                }
+
+                for (FTile* TileToDrop : TilesToDrop)
+                {
+                    if (ASSSphere* Ball = TileToDrop->Ball.Get()) Ball->Destroy();
+                    TileToDrop->Reset();
+                    DropCount++;
+                }
+                TilesToDrop.clear();
+            }
+        }
+
+        // TODO here come code to count win points for drop balls / VFX?
+        if (DropCount) UE_LOG(LogTemp, Display, TEXT("DROP!!! %d balls"), DropCount);
     }
     SetupRollBall();
+}
+
+// for tiles with balls
+void ASSGameLevelGameMode::GetTilesNotConnectedToGrid(FTile* TargetTile, std::unordered_set<FTile*>& TilesNotConnectedToGrid)
+{
+    std::vector<FTile*> Frontier{TargetTile};
+    while (!Frontier.empty())
+    {
+        FTile* CurrentTile = Frontier.back();
+        TilesNotConnectedToGrid.insert(CurrentTile);
+        Frontier.pop_back();
+
+        for (FTile* Tile : CurrentTile->Neighbors)
+        {
+            if (!Tile || Tile->Empty() || TilesNotConnectedToGrid.contains(Tile)) continue;
+            Frontier.push_back(Tile);
+        }
+    }
+}
+
+// for tiles with balls
+void ASSGameLevelGameMode::GetSameColorConnectedTiles(FTile* TargetTile, std::unordered_set<FTile*>& SameColorConnectedTiles)
+{
+    std::vector<FTile*> Frontier{TargetTile};
+    while (!Frontier.empty())
+    {
+        FTile* CurrentTile = Frontier.back();
+        SameColorConnectedTiles.insert(CurrentTile);
+        Frontier.pop_back();
+
+        for (FTile* Tile : CurrentTile->Neighbors)
+        {
+            if (!Tile || Tile->Empty() || Tile->Color != TargetTile->Color || SameColorConnectedTiles.contains(Tile)) continue;
+            Frontier.push_back(Tile);
+        }
+    }
 }
 
 void ASSGameLevelGameMode::SetBallCDO() const
@@ -215,4 +303,40 @@ void ASSGameLevelGameMode::SetBallCDO() const
 
     const float MeshScale = (BallType->MeshDiameter / 2.f) / BallType->Mesh->GetBounds().GetSphere().W;
     BallCDO->StaticMeshComponent->SetWorldScale3D(FVector(MeshScale));
+}
+
+// check if ball is connected to any ball on grid top.
+// for tiles with balls
+bool ASSGameLevelGameMode::IsTileConnectedToGrid(const FTile* TargetTile) const
+{
+    // Use Greedy Best First Search. Grid is weighted, undirected graph. Tile with ball is node in graph.
+    // Heuristic made with operator< for Tile row and priority_queue, so that top (up) tiles are in priority.    
+    std::priority_queue<const FTile*, std::vector<const FTile*>, std::greater<const FTile*>> Frontier;
+    std::unordered_map<const FTile*, const FTile*> CameFrom;
+    Frontier.push(TargetTile);
+    CameFrom[TargetTile] = TargetTile;
+
+    SIZE_T Counter = 0;
+    bool bIsConnected = false;
+
+    while (!Frontier.empty())
+    {
+        const FTile* CurrentTile = Frontier.top();
+        Frontier.pop();
+        if (CurrentTile->Row == 0)
+        {
+            bIsConnected = true;
+            break;
+        }
+
+        for (const FTile* Tile : CurrentTile->Neighbors)
+        {
+            if (!Tile || Tile->Empty() || CameFrom.contains(Tile)) continue;
+            CameFrom[Tile] = CurrentTile;
+            Frontier.push(Tile);
+        }
+        Counter++;
+    }
+    UE_LOG(LogTemp, Display, TEXT("IsTileConnectedToGrid: is connected %d, iterations %llu"), bIsConnected, Counter);
+    return bIsConnected;
 }

@@ -63,17 +63,11 @@ void ASSGrid::GenerateGrid()
             FTile& Tile = Tiles[Row * ColumnsNum + Column];
             if (Tile.bIsOutOfRightEdge) continue;
             SetValidNeighbor(Tile, &FTile::TopLeft);
-            Tile.Neighbors.Add(Tile.TopLeft);
             SetValidNeighbor(Tile, &FTile::TopRight);
-            Tile.Neighbors.Add(Tile.TopRight);
             SetValidNeighbor(Tile, &FTile::Left);
-            Tile.Neighbors.Add(Tile.Left);
             SetValidNeighbor(Tile, &FTile::Right);
-            Tile.Neighbors.Add(Tile.Right);
             SetValidNeighbor(Tile, &FTile::BottomLeft);
-            Tile.Neighbors.Add(Tile.BottomLeft);
             SetValidNeighbor(Tile, &FTile::BottomRight);
-            Tile.Neighbors.Add(Tile.BottomRight);
         }
     }
     UE_LOG(ASSGridLog, Display, TEXT("Grid generated. Rows %d, columns %d, %d tiles, %.2f width, %.2f height"), RowsNum, ColumnsNum,
@@ -118,4 +112,5 @@ void ASSGrid::SetValidNeighbor(FTile& Tile, const FTileMemberPtr TileMemberPtr)
         return;
     };
     Tile.*TileMemberPtr = &Tiles[ID];
+    Tile.Neighbors.insert(&Tiles[ID]);
 }

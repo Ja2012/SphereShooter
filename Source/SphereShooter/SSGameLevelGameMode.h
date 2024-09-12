@@ -51,4 +51,7 @@ protected:
     TObjectPtr<class APlayerController> PlayerController;
     TObjectPtr<class ASSPawn> Pawn;
 
+    bool IsTileConnectedToGrid(const FTile* TargetTile) const;
+    void GetTilesNotConnectedToGrid(FTile* TargetTile, std::unordered_set<FTile*>& TilesNotConnectedToGrid);
+    void GetSameColorConnectedTiles(FTile* TargetTile,  std::unordered_set<FTile*>& SameColorConnectedTiles);
 };
