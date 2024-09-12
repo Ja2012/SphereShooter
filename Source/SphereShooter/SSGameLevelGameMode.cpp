@@ -122,7 +122,8 @@ void ASSGameLevelGameMode::SetBallsGrid()
         Ball->FinishSpawning(SpawnTransform);
 
     }
-    UE_LOG(LogTemp, Display, TEXT("%d balls created for %d rows"), BallRowsNum * Grid->ColumnsNum, BallRowsNum);
+    UE_LOG(LogTemp, Display, TEXT("%d balls created for %d rows, %d columns"), BallRowsNum * Grid->ColumnsNum, BallRowsNum,
+        Grid->ColumnsNum);
 }
 
 void ASSGameLevelGameMode::OnRollBallHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp,
@@ -130,7 +131,7 @@ void ASSGameLevelGameMode::OnRollBallHit(UPrimitiveComponent* HitComponent, AAct
 {
     if (IsValid(OtherActor) && !OtherActor->IsA(ASSSphere::StaticClass())) return;
     ASSSphere* RollBall = Cast<ASSSphere>(HitComponent->GetOwner());
-    RollBall->TurnIntoGridBall();
+
     const ASSSphere* GridBall = Cast<ASSSphere>(OtherActor);
     const double HitNormalYaw = Hit.ImpactNormal.Rotation().Yaw;
 
@@ -168,7 +169,7 @@ void ASSGameLevelGameMode::OnRollBallHit(UPrimitiveComponent* HitComponent, AAct
             break;
         }
     }
-    
+
     // edge cases
     // left
     if (HitNormalYaw < 0 && GridBall->Tile->Column == 0 && GridBall->Tile->Row % 2 == 0)
@@ -182,20 +183,22 @@ void ASSGameLevelGameMode::OnRollBallHit(UPrimitiveComponent* HitComponent, AAct
         TileToLand = GridBall->Tile->Row % 2 == 0 ? GridBall->Tile->BottomLeft : GridBall->Tile->BottomRight;
         UE_LOG(LogTemp, Display, TEXT("right edge shift"));
     }
-    
+
+    // out of edge cases
+    if (!TileToLand || (TileToLand && !TileToLand->Empty()))
+    {
+        ensureMsgf(false, TEXT("Roll Ball out of edge!!!"));
+        RollBall->Destroy();
+        SetupRollBall();
+        return;
+    }
+
     checkf(TileToLand->Ball == nullptr, TEXT("Landing tile is not empty"));
 
     // Landing
+    RollBall->TurnIntoGridBall();
     RollBall->SetActorLocation(TileToLand->Location, false, nullptr, ETeleportType::ResetPhysics);
     TileToLand->Set(RollBall);
-
-    // TODO debug
-    // UE_LOG(ASSGameLevelGameModeLog, Display, TEXT("GridBall row %d, col %d, loc %s"), GridBall->Tile->Row, GridBall->Tile->Column,
-    //     *GridBall->Tile->Location.ToString());
-    // UE_LOG(ASSGameLevelGameModeLog, Display, TEXT("Tile to connect row %d, col %d, loc %s"), Tile->Row, Tile->Column,
-    //     *Tile->Location.ToString());
-    // UE_LOG(ASSGameLevelGameModeLog, Display, TEXT("RollBall row %d, col %d, loc %s\n"), RollBall->Tile->Row, RollBall->Tile->Column,
-    //     *RollBall->Tile->Location.ToString());
 
     // check if hit same color
     std::unordered_set<FTile*> StrikeTiles{};
