@@ -106,5 +106,9 @@ void ASSPawn::SetRollBall(ASSSphere* Ball)
 
 void ASSPawn::Roll(FVector Impulse) 
 {
-    CurrentRollBoll->Roll(Impulse);
+    if(CurrentRollBoll)
+    {
+        CurrentRollBoll->Roll(Impulse);        
+        CurrentRollBoll = nullptr;
+    }
 }
