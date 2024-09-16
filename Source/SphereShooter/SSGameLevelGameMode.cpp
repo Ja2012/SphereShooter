@@ -8,6 +8,7 @@
 #include "Engine/AssetManager.h"
 #include "Components/SphereComponent.h"
 #include "DrawDebugHelpers.h"
+#include "SSGameStateBase.h"
 
 #include <unordered_map>
 #include <unordered_set>
@@ -16,8 +17,11 @@ DEFINE_LOG_CATEGORY_STATIC(ASSGameLevelGameModeLog, All, All);
 
 ASSGameLevelGameMode::ASSGameLevelGameMode()
 {
+    PrimaryActorTick.bStartWithTickEnabled = true;
+    PrimaryActorTick.bCanEverTick = true;
     DefaultPawnClass = ASSPawn::StaticClass();
     PlayerControllerClass = APlayerController::StaticClass();
+    GameStateClass = ASSGameStateBase::StaticClass();
 }
 
 void ASSGameLevelGameMode::BeginPlay()
@@ -25,6 +29,7 @@ void ASSGameLevelGameMode::BeginPlay()
     Super::BeginPlay();
     PlayerController = GetWorld()->GetFirstPlayerController<APlayerController>();
     Pawn = Cast<ASSPawn>(PlayerController->GetPawn());
+    MyGameState = GetGameState<ASSGameStateBase>();
     LoadBallTypeDataAsset();
 
 }
@@ -34,6 +39,16 @@ void ASSGameLevelGameMode::Init()
     SetBallCDO();
     SetupRollBall();
     SetBallsGrid();
+}
+
+void ASSGameLevelGameMode::Tick(float DeltaSeconds)
+{
+    Super::Tick(DeltaSeconds);
+
+    const FString DebugMessage { //
+        "Points: " + FString::FromInt(MyGameState->PlayerPoints) + "\n" + //
+        "Misses: " + FString::FromInt(MyGameState->MissesCount)};  
+    GEngine->AddOnScreenDebugMessage(0, 0.f, FColor::Red, DebugMessage, false, FVector2d(2.f,2.f));
 }
 
 FVector ASSGameLevelGameMode::FindPlayerBallStartPosition() const
@@ -135,17 +150,14 @@ void ASSGameLevelGameMode::OnRollBallHit(UPrimitiveComponent* HitComponent, AAct
     const ASSSphere* GridBall = Cast<ASSSphere>(OtherActor);
     const double HitNormalYaw = Hit.ImpactNormal.Rotation().Yaw;
 
-    // check if pile of grid balls hangs too low and player hit it from below - end game
     if (GridBall->Tile->Row == Grid->RowsNum - 1 && FMath::Abs(HitNormalYaw) >= 120)
     {
-        // TODO make game over
-        UE_LOG(ASSGameLevelGameModeLog, Display, TEXT("Game Over"));
-        RollBall->Destroy();
+        GameOver();
         return;
     }
 
     // TODO debug
-    UE_LOG(LogTemp, Display, TEXT("HitYaw %.2f"), HitNormalYaw);
+    UE_LOG(LogTemp, Display, TEXT("HIT!!! with yaw: %.2f"), HitNormalYaw);
     DrawDebugDirectionalArrow(GetWorld(), Hit.ImpactPoint, Hit.ImpactPoint + Hit.ImpactNormal * 100.f, BallType->MeshDiameter,
         FColor::White, false, 5, -1,
         3);
@@ -200,23 +212,24 @@ void ASSGameLevelGameMode::OnRollBallHit(UPrimitiveComponent* HitComponent, AAct
     RollBall->SetActorLocation(TileToLand->Location, false, nullptr, ETeleportType::ResetPhysics);
     TileToLand->Set(RollBall);
 
-    // check if hit same color
-    std::unordered_set<FTile*> StrikeTiles{};
-    GetSameColorConnectedTiles(TileToLand, StrikeTiles);
+    uint8 StrikeCount = 0;
+    uint8 DropCount = 0;
 
-    if (StrikeTiles.size() > 1)
+    // check if hit same color
+    std::unordered_set<FTile*> SameColorConnectedTiles{};
+    GetSameColorConnectedTiles(TileToLand, SameColorConnectedTiles);
+
+    if (SameColorConnectedTiles.size() >= 3)
     {
-        // TODO here come code to count win points for strikes / VFX? 
-        uint8 StrikeCount = StrikeTiles.size();
-        UE_LOG(LogTemp, Display, TEXT("STRIKE!!! %d balls"), StrikeCount);
+        StrikeCount = SameColorConnectedTiles.size();
 
         // find strike neighbours and then destroy strike 
         std::unordered_set<FTile*> StrikeNeighborTiles{};
-        for (FTile* StrikeTile : StrikeTiles)
+        for (FTile* StrikeTile : SameColorConnectedTiles)
         {
             for (FTile* NeighbourTile : StrikeTile->Neighbors)
             {
-                if (!NeighbourTile || NeighbourTile->Empty() || StrikeTiles.contains(NeighbourTile) || StrikeNeighborTiles.contains(
+                if (!NeighbourTile || NeighbourTile->Empty() || SameColorConnectedTiles.contains(NeighbourTile) || StrikeNeighborTiles.contains(
                         NeighbourTile))
                     continue;
                 StrikeNeighborTiles.insert(NeighbourTile);
@@ -227,7 +240,6 @@ void ASSGameLevelGameMode::OnRollBallHit(UPrimitiveComponent* HitComponent, AAct
 
         // look for flying balls, destroy and then repeat, so that we don't overuse Greedy Best First Search Algorithm (IsTileConnectedToGrid)
         std::unordered_set<FTile*> TilesToDrop{};
-        uint8 DropCount = 0;
         // for (uint16 i = 0; i < StrikeNeighborTiles.size(); ++i)
         for (std::unordered_set<FTile*>::iterator Iter = StrikeNeighborTiles.begin(), IteratorEnd = StrikeNeighborTiles.end();
              Iter != IteratorEnd; ++Iter)
@@ -254,9 +266,40 @@ void ASSGameLevelGameMode::OnRollBallHit(UPrimitiveComponent* HitComponent, AAct
                 TilesToDrop.clear();
             }
         }
+    }
 
-        // TODO here come code to count win points for drop balls / VFX?
-        if (DropCount) UE_LOG(LogTemp, Display, TEXT("DROP!!! %d balls"), DropCount);
+    
+    SIZE_T PointsOld = MyGameState->PlayerPoints;
+    // TODO here come code to count win points for strikes / VFX?
+    if (StrikeCount > 2)
+    {
+        MyGameState->PlayerPoints += StrikeCount;
+        UE_LOG(LogTemp, Display, TEXT("Strike %d balls | Points: %llu -> %llu"), StrikeCount, PointsOld, MyGameState->PlayerPoints);
+    }
+    
+    // TODO here come code to count win points for drop balls / VFX?
+    if (DropCount)
+    {
+        MyGameState->PlayerPoints += DropCount;
+        UE_LOG(LogTemp, Display, TEXT("Drop %d balls | Points: %llu -> %llu"), DropCount, PointsOld, MyGameState->PlayerPoints);
+    }
+
+    if (!DropCount && !StrikeCount)
+    {
+        ++(MyGameState->MissesCount);
+        UE_LOG(LogTemp, Display, TEXT("Miss %d -> %d our of %d"), MyGameState->MissesCount -1 , MyGameState->MissesCount, MissesLimitNum);
+
+        if (MyGameState->MissesCount >= MissesLimitNum)
+        {
+            MovePlayerCloserToGrid();
+            // check for gameover
+            if (CheckIfGridBallCrossRollBallY())
+            {
+                GameOver();
+                return;
+            };
+            MyGameState->MissesCount = 0;
+        }
     }
     SetupRollBall();
 }
@@ -295,6 +338,32 @@ void ASSGameLevelGameMode::GetSameColorConnectedTiles(FTile* TargetTile, std::un
             Frontier.push_back(Tile);
         }
     }
+}
+
+void ASSGameLevelGameMode::MovePlayerCloserToGrid()
+{
+    // move pawn with his camera
+    const FVector MoveDistance{BallType->MeshDiameter, 0, 0};
+    Pawn->SetActorLocation(Pawn->GetActorLocation() + MoveDistance);
+
+    // move roll ball spawn loc
+    TArray<AActor*> Array;
+    UGameplayStatics::GetAllActorsWithTag(this, PlayerBallPositionMarkActorTag, Array);
+    Array[0]->SetActorLocation(Array[0]->GetActorLocation() + MoveDistance);
+}
+
+// check if pile of grid balls hangs too low and player hit it from below - end game
+bool ASSGameLevelGameMode::CheckIfGridBallCrossRollBallY()
+{
+    const FTile* Tile = Grid->GetLowestTileWithBall();
+    UE_LOG(LogTemp, Display, TEXT("Lowest ball is: %s, row %d, column %d"), *UEnum::GetValueAsString(Tile->Color), Tile->Row, Tile->Column);
+    return (Tile->Location.X - BallType->MeshDiameter / 2.f) <= (FindPlayerBallStartPosition().X + BallType->MeshDiameter / 2.f);
+}
+
+void ASSGameLevelGameMode::GameOver()
+{
+    // TODO make game over
+    UE_LOG(ASSGameLevelGameModeLog, Display, TEXT("Game Over"));
 }
 
 void ASSGameLevelGameMode::SetBallCDO() const

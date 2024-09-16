@@ -26,14 +26,21 @@ public:
         OutRow = ID / ColumnsNum;
         OutCurrentColumn = ID % ColumnsNum;
     }
+
     uint32 RowColumnToID(const uint8 Row, const uint8 CurrentColumn) const
     {
         return Row * ColumnsNum + CurrentColumn;
     };
 
-    TArray<FTile> Tiles {};
+    TArray<FTile> Tiles{};
     uint8 ColumnsNum = 0;
     uint8 RowsNum = 0;
+
+    FTile* GetLowestTileWithBall()
+    {
+        const int32 Index = Tiles.FindLastByPredicate([](const FTile& Tile) { return !Tile.Empty(); });
+        return &Tiles[Index];
+    }
 
 protected:
     using FTileMemberPtr = FTile* FTile::*;

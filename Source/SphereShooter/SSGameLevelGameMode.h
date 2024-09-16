@@ -17,12 +17,13 @@ class SPHERESHOOTER_API ASSGameLevelGameMode : public AGameModeBase
 public:
     ASSGameLevelGameMode();
     virtual void BeginPlay() override;
+    virtual void Tick(float DeltaSeconds) override;
     TObjectPtr<UBallType> GetBallType() const { return BallType; }
     FVector FindPlayerBallStartPosition() const;
 
 protected:
     void Init();
-
+    
     UPROPERTY()
     ASSGrid* Grid;
 
@@ -36,7 +37,13 @@ protected:
     // Grid with balls will take all space between walls and will have this quantity of rows.
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Grid", meta = (DisplayPriority = "-1"))
     uint8 BallRowsNum = 10;
+    
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Game Rules", meta = (DisplayPriority = "-1"))
+    uint8 MissesLimitNum = 5;
 
+    // to track that 
+    uint8 CurrentGameLastRow = 0;
+    
     void LoadBallTypeDataAsset();
     void OnLoadBallTypeDataAsset();
 
@@ -50,8 +57,12 @@ protected:
 
     TObjectPtr<class APlayerController> PlayerController;
     TObjectPtr<class ASSPawn> Pawn;
+    TObjectPtr<class ASSGameStateBase> MyGameState;
 
     bool IsTileConnectedToGrid(const FTile* TargetTile) const;
     void GetTilesNotConnectedToGrid(FTile* TargetTile, std::unordered_set<FTile*>& TilesNotConnectedToGrid);
     void GetSameColorConnectedTiles(FTile* TargetTile,  std::unordered_set<FTile*>& SameColorConnectedTiles);
+    void MovePlayerCloserToGrid();
+    bool CheckIfGridBallCrossRollBallY();
+    void GameOver();
 };

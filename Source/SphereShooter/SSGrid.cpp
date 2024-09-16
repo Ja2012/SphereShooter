@@ -26,12 +26,12 @@ void ASSGrid::GenerateGrid()
     const float R = 2.f * r / FMath::Sqrt(3.f);
     const float TileHeight = 2.f * R;
 
-    const float GridWidth = (-1.f) * GridStartLoc.Y * 2.f;
+    const float GridWidth = FMath::Abs(GridStartLoc.Y) * 2.f;
     const float GridHeight = GridStartLoc.X - PlayerBallLocation.X;
     // find Rows from GridHeight = R + Rows * (R + R / 2.f) + R;
-    RowsNum = (2.f * (GridHeight - 1.f * R)) / (3.f * R);
+    RowsNum = FMath::CeilToInt((2.f * (GridHeight - 2.f * R)) / (3.f * R));
 
-    ColumnsNum = uint8(GridWidth / TileWidth);
+    ColumnsNum = GridWidth / TileWidth;
 
     Tiles.Reserve(ColumnsNum * RowsNum);
 
