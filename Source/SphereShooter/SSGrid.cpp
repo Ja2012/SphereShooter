@@ -30,7 +30,7 @@ void ASSGrid::GenerateGrid()
     const float GridHeight = GridStartLoc.X - PlayerBallLocation.X;
     // find Rows from GridHeight = R + Rows * (R + R / 2.f) + R;
     RowsNum = FMath::CeilToInt((2.f * (GridHeight - 2.f * R)) / (3.f * R));
-
+    
     ColumnsNum = GridWidth / TileWidth;
 
     Tiles.Reserve(ColumnsNum * RowsNum);
@@ -47,7 +47,8 @@ void ASSGrid::GenerateGrid()
             const FVector TileCenter = FVector(TileCenterX, TileCenterY, TileCenterZ);
             Tiles.Emplace(Row * ColumnsNum + Column, TileCenter, Row, Column, //
                 // make sure that last column in each odd row will be empty (because it is out of right edge of game field)
-                Row % 2 == 1 && Column == ColumnsNum - 1 ? true : false);
+                Row % 2 == 1 && Column == ColumnsNum - 1 ? true : false,
+                Row == 0 ? true : false);
             
             // TODO debug
             DrawDebugCrosshairs(GetWorld(), Tiles[RowColumnToID(Row, Column)].Location, FRotator::ZeroRotator, 30, FColor::Red, true, -1,

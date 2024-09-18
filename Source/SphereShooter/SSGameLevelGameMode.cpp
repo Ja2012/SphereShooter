@@ -13,6 +13,8 @@
 #include <unordered_map>
 #include <unordered_set>
 
+#include "DynamicMesh/DynamicMesh3.h"
+
 DEFINE_LOG_CATEGORY_STATIC(ASSGameLevelGameModeLog, All, All);
 
 ASSGameLevelGameMode::ASSGameLevelGameMode()
@@ -291,7 +293,7 @@ void ASSGameLevelGameMode::OnRollBallHit(UPrimitiveComponent* HitComponent, AAct
 
         if (MyGameState->MissesCount >= MissesLimitNum)
         {
-            MovePlayerCloserToGrid();
+            MoveGridBallsDown();
             // check for gameover
             if (CheckIfGridBallCrossRollBallY())
             {
@@ -340,16 +342,26 @@ void ASSGameLevelGameMode::GetSameColorConnectedTiles(FTile* TargetTile, std::un
     }
 }
 
-void ASSGameLevelGameMode::MovePlayerCloserToGrid()
+void ASSGameLevelGameMode::MoveGridBallsDown()
 {
-    // move pawn with his camera
-    const FVector MoveDistance{BallType->MeshDiameter, 0, 0};
-    Pawn->SetActorLocation(Pawn->GetActorLocation() + MoveDistance);
+    // todo debug
+    FlushPersistentDebugLines(GetWorld());
+    
+    const FVector MoveVector {-BallType->MeshDiameter * GridMoveIfMissRatioToBallSize, 0, 0};
+    Grid->SetActorLocation(Grid->GetActorLocation() + MoveVector);
+    for (FTile& Tile: Grid->Tiles)
+    {
+        
+        Tile.Location += MoveVector;
+        
+        // todo debug
+        DrawDebugCrosshairs(GetWorld(), Tile.Location, FRotator::ZeroRotator, 30, FColor::Red, true, -1,
+    0);
+        
+        if (Tile.Empty()) continue;
+        Tile.Ball->SetActorLocation(Tile.Location);
 
-    // move roll ball spawn loc
-    TArray<AActor*> Array;
-    UGameplayStatics::GetAllActorsWithTag(this, PlayerBallPositionMarkActorTag, Array);
-    Array[0]->SetActorLocation(Array[0]->GetActorLocation() + MoveDistance);
+    }
 }
 
 // check if pile of grid balls hangs too low and player hit it from below - end game
@@ -395,7 +407,7 @@ bool ASSGameLevelGameMode::IsTileConnectedToGrid(const FTile* TargetTile) const
     {
         const FTile* CurrentTile = Frontier.top();
         Frontier.pop();
-        if (CurrentTile->Row == 0)
+        if (CurrentTile->bIsTopTile)
         {
             bIsConnected = true;
             break;

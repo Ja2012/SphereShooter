@@ -40,6 +40,9 @@ protected:
     
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Game Rules", meta = (DisplayPriority = "-1"))
     uint8 MissesLimitNum = 5;
+    
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Game Rules", meta = (DisplayPriority = "-1"))
+    float GridMoveIfMissRatioToBallSize = 1.f;
 
     // to track that 
     uint8 CurrentGameLastRow = 0;
@@ -62,7 +65,7 @@ protected:
     bool IsTileConnectedToGrid(const FTile* TargetTile) const;
     void GetTilesNotConnectedToGrid(FTile* TargetTile, std::unordered_set<FTile*>& TilesNotConnectedToGrid);
     void GetSameColorConnectedTiles(FTile* TargetTile,  std::unordered_set<FTile*>& SameColorConnectedTiles);
-    void MovePlayerCloserToGrid();
+    void MoveGridBallsDown();
     bool CheckIfGridBallCrossRollBallY();
     void GameOver();
 };
