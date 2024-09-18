@@ -27,7 +27,10 @@ protected:
     UPROPERTY()
     ASSGrid* Grid;
 
+    UPROPERTY()
     TSoftObjectPtr<UBallType> BallTypeSoftPtr;
+
+    UPROPERTY()
     TObjectPtr<UBallType> BallType;
 
     // tag of scene actor that point to player roll ball start position
