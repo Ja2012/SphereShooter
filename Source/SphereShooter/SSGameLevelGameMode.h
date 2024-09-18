@@ -36,6 +36,14 @@ protected:
     // tag of scene actor that point to player roll ball start position
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Ball", meta = (DisplayPriority = "-1"))
     FName PlayerBallPositionMarkActorTag = "PlayerBallXYLocation";
+    void SetCrossLineActor();
+    
+    // CrossLine
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Game", meta = (DisplayPriority = "-1"))
+    FName CrossLineActorTag = "CrossLine";
+    UPROPERTY()
+    TObjectPtr<AActor> CrossLine;
+
     
     // Grid with balls will take all space between walls and will have this quantity of rows.
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Grid", meta = (DisplayPriority = "-1"))

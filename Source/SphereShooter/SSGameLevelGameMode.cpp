@@ -33,6 +33,7 @@ void ASSGameLevelGameMode::BeginPlay()
     Pawn = Cast<ASSPawn>(PlayerController->GetPawn());
     MyGameState = GetGameState<ASSGameStateBase>();
     LoadBallTypeDataAsset();
+    SetCrossLineActor();
 
 }
 
@@ -40,7 +41,15 @@ void ASSGameLevelGameMode::Init()
 {
     SetBallCDO();
     SetupRollBall();
-    SetBallsGrid();
+    SetBallsGrid();    
+}
+
+void ASSGameLevelGameMode::SetCrossLineActor()
+{
+    TArray<AActor*> Array;
+    UGameplayStatics::GetAllActorsWithTag(this, CrossLineActorTag, Array);
+    checkf(Array.Num() != 0, TEXT("No actor with tag %s"), *CrossLineActorTag.ToString());
+    CrossLine = Array[0];
 }
 
 void ASSGameLevelGameMode::Tick(float DeltaSeconds)
@@ -152,12 +161,6 @@ void ASSGameLevelGameMode::OnRollBallHit(UPrimitiveComponent* HitComponent, AAct
     const ASSSphere* GridBall = Cast<ASSSphere>(OtherActor);
     const double HitNormalYaw = Hit.ImpactNormal.Rotation().Yaw;
 
-    if (GridBall->Tile->Row == Grid->RowsNum - 1 && FMath::Abs(HitNormalYaw) >= 120)
-    {
-        GameOver();
-        return;
-    }
-
     // TODO debug
     UE_LOG(LogTemp, Display, TEXT("HIT!!! with yaw: %.2f"), HitNormalYaw);
     DrawDebugDirectionalArrow(GetWorld(), Hit.ImpactPoint, Hit.ImpactPoint + Hit.ImpactNormal * 100.f, BallType->MeshDiameter,
@@ -213,6 +216,12 @@ void ASSGameLevelGameMode::OnRollBallHit(UPrimitiveComponent* HitComponent, AAct
     RollBall->TurnIntoGridBall();
     RollBall->SetActorLocation(TileToLand->Location, false, nullptr, ETeleportType::ResetPhysics);
     TileToLand->Set(RollBall);
+    
+    if (CheckIfGridBallCrossRollBallY())
+    {
+        GameOver();
+        return;
+    }
 
     uint8 StrikeCount = 0;
     uint8 DropCount = 0;
@@ -369,7 +378,7 @@ bool ASSGameLevelGameMode::CheckIfGridBallCrossRollBallY()
 {
     const FTile* Tile = Grid->GetLowestTileWithBall();
     UE_LOG(LogTemp, Display, TEXT("Lowest ball is: %s, row %d, column %d"), *UEnum::GetValueAsString(Tile->Color), Tile->Row, Tile->Column);
-    return (Tile->Location.X - BallType->MeshDiameter / 2.f) <= (FindPlayerBallStartPosition().X + BallType->MeshDiameter / 2.f);
+    return Tile->Location.X - (BallType->MeshDiameter / 2.f) <= CrossLine->GetActorLocation().X;
 }
 
 void ASSGameLevelGameMode::GameOver()
