@@ -10,10 +10,7 @@
 #include "DrawDebugHelpers.h"
 #include "SSGameStateBase.h"
 
-#include <unordered_map>
 #include <unordered_set>
-
-#include "DynamicMesh/DynamicMesh3.h"
 
 DEFINE_LOG_CATEGORY_STATIC(ASSGameLevelGameModeLog, All, All);
 
@@ -29,19 +26,20 @@ ASSGameLevelGameMode::ASSGameLevelGameMode()
 void ASSGameLevelGameMode::BeginPlay()
 {
     Super::BeginPlay();
+
     PlayerController = GetWorld()->GetFirstPlayerController<APlayerController>();
     Pawn = Cast<ASSPawn>(PlayerController->GetPawn());
     MyGameState = GetGameState<ASSGameStateBase>();
+
     LoadBallTypeDataAsset();
     SetCrossLineActor();
-
 }
 
 void ASSGameLevelGameMode::Init()
 {
     SetBallCDO();
     SetupRollBall();
-    SetBallsGrid();    
+    InitGrid();
 }
 
 void ASSGameLevelGameMode::SetCrossLineActor()
@@ -56,10 +54,11 @@ void ASSGameLevelGameMode::Tick(float DeltaSeconds)
 {
     Super::Tick(DeltaSeconds);
 
-    const FString DebugMessage { //
+    const FString DebugMessage{
+        //
         "Points: " + FString::FromInt(MyGameState->PlayerPoints) + "\n" + //
-        "Misses: " + FString::FromInt(MyGameState->MissesCount)};  
-    GEngine->AddOnScreenDebugMessage(0, 0.f, FColor::Red, DebugMessage, false, FVector2d(2.f,2.f));
+        "Misses: " + FString::FromInt(MyGameState->MissesCount)};
+    GEngine->AddOnScreenDebugMessage(0, 0.f, FColor::Red, DebugMessage, false, FVector2d(2.f, 2.f));
 }
 
 FVector ASSGameLevelGameMode::FindPlayerBallStartPosition() const
@@ -111,46 +110,14 @@ void ASSGameLevelGameMode::SetupRollBall() const
     RollBall->SphereCollisionComponent->OnComponentHit.AddDynamic(this, &ASSGameLevelGameMode::OnRollBallHit);
 }
 
-void ASSGameLevelGameMode::SetBallsGrid()
+void ASSGameLevelGameMode::InitGrid()
 {
     Grid = Cast<ASSGrid>(UGameplayStatics::GetActorOfClass(this, ASSGrid::StaticClass()));
     checkf(Grid, TEXT("No ASSGrid actor on scene"));
     Grid->GenerateGrid();
-
-    const int64 MaxForRandom = BallType->MaterialInstances.Num() - 1;
-    const FVector Scale{1.f};
-    for (FTile& Tile : Grid->Tiles)
-    {
-        uint8 Row;
-        uint8 Col;
-        Grid->IDToRowColumn(Tile.ID, Row, Col);
-        if (Row > BallRowsNum - 1) break;
-
-        if (Tile.bIsOutOfRightEdge) continue;
-        const FTransform SpawnTransform{FRotator::ZeroRotator, Tile.Location, Scale};
-        ASSSphere* Ball = GetWorld()->SpawnActorDeferred<ASSSphere>(BallType->SphereClass, SpawnTransform);
-
-        // find random color
-        ESSColor Color = ESSColor::ESSC_NoColor;
-        while (Color == ESSColor::ESSC_NoColor)
-        {
-            Color = static_cast<ESSColor>(FMath::RandRange((int64)0, MaxForRandom));
-        }
-
-        // set tile
-        Tile.Color = Color;
-        Tile.Ball = Ball;
-
-        // set random material
-        Ball->Color = Color;
-        Ball->StaticMeshComponent->SetMaterial(0, BallType->MaterialInstances[Color]);
-        Ball->Tile = &Tile;
-        Ball->FinishSpawning(SpawnTransform);
-
-    }
-    UE_LOG(LogTemp, Display, TEXT("%d balls created for %d rows, %d columns"), BallRowsNum * Grid->ColumnsNum, BallRowsNum,
-        Grid->ColumnsNum);
+    Grid->SpawnBalls();
 }
+
 
 void ASSGameLevelGameMode::OnRollBallHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp,
     FVector NormalImpulse, const FHitResult& Hit)
@@ -170,11 +137,13 @@ void ASSGameLevelGameMode::OnRollBallHit(UPrimitiveComponent* HitComponent, AAct
     // find GridBall neighbours and sort them in ascending distance to GridBall
     FVector HitPointLoc = Hit.ImpactPoint;
     TArray<FTile*> GridBallTileNeighbours;
-    Algo::CopyIf(GridBall->Tile->Neighbors, GridBallTileNeighbours, [](const FTile* NeighbourTile) { return NeighbourTile != nullptr; });
-    Algo::Sort(GridBallTileNeighbours, [&HitPointLoc](const FTile* A, const FTile* B)
-    {
-        return (A->Location - HitPointLoc).Length() < (B->Location - HitPointLoc).Length();
-    });
+    Algo::CopyIf(GridBall->Tile->Neighbors, GridBallTileNeighbours, //
+        [](const FTile* NeighbourTile) { return NeighbourTile != nullptr; });
+    Algo::Sort(GridBallTileNeighbours, //
+        [&HitPointLoc](const FTile* A, const FTile* B)
+        {
+            return (A->Location - HitPointLoc).Length() < (B->Location - HitPointLoc).Length();
+        });
 
     // find most close empty tile to land 
     FTile* TileToLand = nullptr;
@@ -216,8 +185,8 @@ void ASSGameLevelGameMode::OnRollBallHit(UPrimitiveComponent* HitComponent, AAct
     RollBall->TurnIntoGridBall();
     RollBall->SetActorLocation(TileToLand->Location, false, nullptr, ETeleportType::ResetPhysics);
     TileToLand->Set(RollBall);
-    
-    if (CheckIfGridBallCrossRollBallY())
+
+    if (IsBallsCrossedLine())
     {
         GameOver();
         return;
@@ -227,23 +196,24 @@ void ASSGameLevelGameMode::OnRollBallHit(UPrimitiveComponent* HitComponent, AAct
     uint8 DropCount = 0;
 
     // check if hit same color
-    std::unordered_set<FTile*> SameColorConnectedTiles{};
-    GetSameColorConnectedTiles(TileToLand, SameColorConnectedTiles);
+    std::unordered_set<FTile*> SameColorTiles{};
+    Grid->GetSameColorConnectedTilesWithBalls(TileToLand, SameColorTiles);
 
-    if (SameColorConnectedTiles.size() >= 3)
+    if (SameColorTiles.size() >= 3)
     {
-        StrikeCount = SameColorConnectedTiles.size();
+        StrikeCount = SameColorTiles.size();
 
         // find strike neighbours and then destroy strike 
-        std::unordered_set<FTile*> StrikeNeighborTiles{};
-        for (FTile* StrikeTile : SameColorConnectedTiles)
+        std::unordered_set<FTile*> TilesInStrike{};
+        for (FTile* StrikeTile : SameColorTiles)
         {
             for (FTile* NeighbourTile : StrikeTile->Neighbors)
             {
-                if (!NeighbourTile || NeighbourTile->Empty() || SameColorConnectedTiles.contains(NeighbourTile) || StrikeNeighborTiles.contains(
-                        NeighbourTile))
+                if (!NeighbourTile || NeighbourTile->Empty() || //
+                    SameColorTiles.contains(NeighbourTile) || //
+                    TilesInStrike.contains(NeighbourTile))
                     continue;
-                StrikeNeighborTiles.insert(NeighbourTile);
+                TilesInStrike.insert(NeighbourTile);
             }
             if (ASSSphere* Ball = StrikeTile->Ball.Get()) Ball->Destroy();
             StrikeTile->Reset();
@@ -251,8 +221,7 @@ void ASSGameLevelGameMode::OnRollBallHit(UPrimitiveComponent* HitComponent, AAct
 
         // look for flying balls, destroy and then repeat, so that we don't overuse Greedy Best First Search Algorithm (IsTileConnectedToGrid)
         std::unordered_set<FTile*> TilesToDrop{};
-        // for (uint16 i = 0; i < StrikeNeighborTiles.size(); ++i)
-        for (std::unordered_set<FTile*>::iterator Iter = StrikeNeighborTiles.begin(), IteratorEnd = StrikeNeighborTiles.end();
+        for (std::unordered_set<FTile*>::iterator Iter = TilesInStrike.begin(), IteratorEnd = TilesInStrike.end();
              Iter != IteratorEnd; ++Iter)
         {
             if (FTile* NeighbourTile = *Iter)
@@ -263,9 +232,9 @@ void ASSGameLevelGameMode::OnRollBallHit(UPrimitiveComponent* HitComponent, AAct
                 std::unordered_set<FTile*>::iterator NextIter = std::next(Iter);
                 if (NextIter != IteratorEnd && (*NextIter)->Neighbors.contains(NeighbourTile)) continue;
 
-                if (!IsTileConnectedToGrid(NeighbourTile))
+                if (!Grid->IsTileWithBallConnectedToTop(NeighbourTile))
                 {
-                    GetTilesNotConnectedToGrid(NeighbourTile, TilesToDrop);
+                    Grid->GetTilesWithBallsNotConnectedToTop(NeighbourTile, TilesToDrop);
                 }
 
                 for (FTile* TileToDrop : TilesToDrop)
@@ -279,7 +248,6 @@ void ASSGameLevelGameMode::OnRollBallHit(UPrimitiveComponent* HitComponent, AAct
         }
     }
 
-    
     SIZE_T PointsOld = MyGameState->PlayerPoints;
     // TODO here come code to count win points for strikes / VFX?
     if (StrikeCount > 2)
@@ -287,7 +255,7 @@ void ASSGameLevelGameMode::OnRollBallHit(UPrimitiveComponent* HitComponent, AAct
         MyGameState->PlayerPoints += StrikeCount;
         UE_LOG(LogTemp, Display, TEXT("Strike %d balls | Points: %llu -> %llu"), StrikeCount, PointsOld, MyGameState->PlayerPoints);
     }
-    
+
     // TODO here come code to count win points for drop balls / VFX?
     if (DropCount)
     {
@@ -298,13 +266,12 @@ void ASSGameLevelGameMode::OnRollBallHit(UPrimitiveComponent* HitComponent, AAct
     if (!DropCount && !StrikeCount)
     {
         ++(MyGameState->MissesCount);
-        UE_LOG(LogTemp, Display, TEXT("Miss %d -> %d our of %d"), MyGameState->MissesCount -1 , MyGameState->MissesCount, MissesLimitNum);
+        UE_LOG(LogTemp, Display, TEXT("Miss %d -> %d our of %d"), MyGameState->MissesCount -1, MyGameState->MissesCount, MissesLimitNum);
 
         if (MyGameState->MissesCount >= MissesLimitNum)
         {
-            MoveGridBallsDown();
-            // check for gameover
-            if (CheckIfGridBallCrossRollBallY())
+            Grid->MoveDown();
+            if (IsBallsCrossedLine())
             {
                 GameOver();
                 return;
@@ -315,66 +282,7 @@ void ASSGameLevelGameMode::OnRollBallHit(UPrimitiveComponent* HitComponent, AAct
     SetupRollBall();
 }
 
-// for tiles with balls
-void ASSGameLevelGameMode::GetTilesNotConnectedToGrid(FTile* TargetTile, std::unordered_set<FTile*>& TilesNotConnectedToGrid)
-{
-    std::vector<FTile*> Frontier{TargetTile};
-    while (!Frontier.empty())
-    {
-        FTile* CurrentTile = Frontier.back();
-        TilesNotConnectedToGrid.insert(CurrentTile);
-        Frontier.pop_back();
-
-        for (FTile* Tile : CurrentTile->Neighbors)
-        {
-            if (!Tile || Tile->Empty() || TilesNotConnectedToGrid.contains(Tile)) continue;
-            Frontier.push_back(Tile);
-        }
-    }
-}
-
-// for tiles with balls
-void ASSGameLevelGameMode::GetSameColorConnectedTiles(FTile* TargetTile, std::unordered_set<FTile*>& SameColorConnectedTiles)
-{
-    std::vector<FTile*> Frontier{TargetTile};
-    while (!Frontier.empty())
-    {
-        FTile* CurrentTile = Frontier.back();
-        SameColorConnectedTiles.insert(CurrentTile);
-        Frontier.pop_back();
-
-        for (FTile* Tile : CurrentTile->Neighbors)
-        {
-            if (!Tile || Tile->Empty() || Tile->Color != TargetTile->Color || SameColorConnectedTiles.contains(Tile)) continue;
-            Frontier.push_back(Tile);
-        }
-    }
-}
-
-void ASSGameLevelGameMode::MoveGridBallsDown()
-{
-    // todo debug
-    FlushPersistentDebugLines(GetWorld());
-    
-    const FVector MoveVector {-BallType->MeshDiameter * GridMoveIfMissRatioToBallSize, 0, 0};
-    Grid->SetActorLocation(Grid->GetActorLocation() + MoveVector);
-    for (FTile& Tile: Grid->Tiles)
-    {
-        
-        Tile.Location += MoveVector;
-        
-        // todo debug
-        DrawDebugCrosshairs(GetWorld(), Tile.Location, FRotator::ZeroRotator, 30, FColor::Red, true, -1,
-    0);
-        
-        if (Tile.Empty()) continue;
-        Tile.Ball->SetActorLocation(Tile.Location);
-
-    }
-}
-
-// check if pile of grid balls hangs too low and player hit it from below - end game
-bool ASSGameLevelGameMode::CheckIfGridBallCrossRollBallY()
+bool ASSGameLevelGameMode::IsBallsCrossedLine() const
 {
     const FTile* Tile = Grid->GetLowestTileWithBall();
     UE_LOG(LogTemp, Display, TEXT("Lowest ball is: %s, row %d, column %d"), *UEnum::GetValueAsString(Tile->Color), Tile->Row, Tile->Column);
@@ -389,47 +297,11 @@ void ASSGameLevelGameMode::GameOver()
 
 void ASSGameLevelGameMode::SetBallCDO() const
 {
-    ASSSphere* BallCDO = Cast<ASSSphere>(BallType->SphereClass->GetDefaultObject());
+    const ASSSphere* BallCDO = Cast<ASSSphere>(BallType->SphereClass->GetDefaultObject());
 
     BallCDO->StaticMeshComponent->SetStaticMesh(BallType->Mesh);
     BallCDO->SphereCollisionComponent->SetSphereRadius(BallType->CollisionDiameter / 2.f);
 
     const float MeshScale = (BallType->MeshDiameter / 2.f) / BallType->Mesh->GetBounds().GetSphere().W;
     BallCDO->StaticMeshComponent->SetWorldScale3D(FVector(MeshScale));
-}
-
-// check if ball is connected to any ball on grid top.
-// for tiles with balls
-bool ASSGameLevelGameMode::IsTileConnectedToGrid(const FTile* TargetTile) const
-{
-    // Use Greedy Best First Search. Grid is weighted, undirected graph. Tile with ball is node in graph.
-    // Heuristic made with operator< for Tile row and priority_queue, so that top (up) tiles are in priority.    
-    std::priority_queue<const FTile*, std::vector<const FTile*>, std::greater<const FTile*>> Frontier;
-    std::unordered_map<const FTile*, const FTile*> CameFrom;
-    Frontier.push(TargetTile);
-    CameFrom[TargetTile] = TargetTile;
-
-    SIZE_T Counter = 0;
-    bool bIsConnected = false;
-
-    while (!Frontier.empty())
-    {
-        const FTile* CurrentTile = Frontier.top();
-        Frontier.pop();
-        if (CurrentTile->bIsTopTile)
-        {
-            bIsConnected = true;
-            break;
-        }
-
-        for (const FTile* Tile : CurrentTile->Neighbors)
-        {
-            if (!Tile || Tile->Empty() || CameFrom.contains(Tile)) continue;
-            CameFrom[Tile] = CurrentTile;
-            Frontier.push(Tile);
-        }
-        Counter++;
-    }
-    UE_LOG(LogTemp, Display, TEXT("IsTileConnectedToGrid: is connected %d, iterations %llu"), bIsConnected, Counter);
-    return bIsConnected;
 }

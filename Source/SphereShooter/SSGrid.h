@@ -33,16 +33,23 @@ public:
     };
 
     TArray<FTile> Tiles{};
-    uint8 ColumnsNum = 0;
-    uint8 RowsNum = 0;
+    uint8 ColumnsNum{0};
+    uint8 RowsNum{0};
 
-    FTile* GetLowestTileWithBall()
+    const FTile* GetLowestTileWithBall() const
     {
-        const int32 Index = Tiles.FindLastByPredicate([](const FTile& Tile) { return !Tile.Empty(); });
-        return &Tiles[Index];
+        return &Tiles[ //
+            Tiles.FindLastByPredicate([](const FTile& Tile) { return !Tile.Empty(); })
+            ];
     }
+
+    static bool IsTileWithBallConnectedToTop(const FTile* TargetTile);
+    static void GetTilesWithBallsNotConnectedToTop(FTile* TargetTile, std::unordered_set<FTile*>& TilesNotConnectedToGrid);
+    static void GetSameColorConnectedTilesWithBalls(FTile* TargetTile, std::unordered_set<FTile*>& SameColorConnectedTiles);
+    void MoveDown();
+    void SpawnBalls();
 
 protected:
     using FTileMemberPtr = FTile* FTile::*;
-    void SetValidNeighbor(FTile& Tile, const FTileMemberPtr TileMember);
+    void SetNeighbor(FTile& Tile, const FTileMemberPtr TileMember);
 };

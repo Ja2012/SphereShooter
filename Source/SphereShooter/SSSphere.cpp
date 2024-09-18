@@ -17,9 +17,8 @@ ASSSphere::ASSSphere()
     TurnIntoGridBall();
 }
 
-void ASSSphere::Roll(FVector Impulse)
+void ASSSphere::Roll(const FVector& Impulse) const
 {
-    //SphereCollisionComponent->AddAngularImpulseInDegrees(FVector(0.f, RollImpulseValue, 0.f), NAME_None, true);
     if (!SphereCollisionComponent) return;
     SphereCollisionComponent->AddImpulse(Impulse, NAME_None, true);
 }

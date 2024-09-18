@@ -4,72 +4,75 @@
 #include "GameFramework/Pawn.h"
 #include "SSPawn.generated.h"
 
+struct FInputActionValue;
 class ASSSphere;
+class ASSGameLevelGameMode;
+class UInputMappingContext;
+class UInputAction;
+class UNiagaraSystem;
+class UNiagaraComponent;
+class UCameraComponent;
 
 UCLASS()
 class SPHERESHOOTER_API ASSPawn : public APawn
 {
-	GENERATED_BODY()
+    GENERATED_BODY()
 
 public:
-	// Sets default values for this pawn's properties
-	ASSPawn();
+    ASSPawn();
 
-    virtual void Tick(float DeltaTime) override;
     virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
     virtual void PawnClientRestart() override;
-
-    void SetRollBall(ASSSphere* Ball);
+    
+    void SetRollBall(ASSSphere* Ball) { CurrentRollBoll = Ball; }
     ASSSphere* GetRollBall() const { return CurrentRollBoll; }
-
-    void Roll(FVector Impulse);
-
+    void Roll(const FVector& Impulse);
 
 protected:
-	virtual void BeginPlay() override;
+    virtual void BeginPlay() override;
 
-	UPROPERTY()
-    class ASSGameLevelGameMode* GameMode;
+    UPROPERTY()
+    ASSGameLevelGameMode* GameMode;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AAA|Input") 
-	class UInputMappingContext* InputMappingContext;
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "MyInput", meta = (DisplayPriority = "-1"))
+    UInputMappingContext* InputMappingContext;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AAA|Input")
-	class UInputAction* ShootAction;
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "MyInput", meta = (DisplayPriority = "-1"))
+    UInputAction* ShootAction;
 
-	UFUNCTION()
-	void ShootRollBall(const FInputActionValue& Value);
+    UFUNCTION()
+    void ShootRollBall(const FInputActionValue& Value);
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AAA|Input")
-	float ShootScaleImpulse = 1000.f;
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "MyInput", meta = (DisplayPriority = "-1"))
+    float ShootScaleImpulse = 2000.f;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AAA|Input")
-	class UInputAction* MouseMoveAction;
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "MyInput", meta = (DisplayPriority = "-1"))
+    UInputAction* MouseMoveAction;
 
-	UFUNCTION()
-	void MoveAimBeam(const FInputActionValue& Value);
-
-	UPROPERTY(VisibleAnywhere)
-	class UCameraComponent* CameraComponent;
-
-	UPROPERTY(VisibleAnywhere)
-    class USceneComponent* SceneComponent;
+    UFUNCTION()
+    void MoveAimBeam(const FInputActionValue& Value);
 
     UPROPERTY(VisibleAnywhere)
-    class UNiagaraComponent* AimBeamNiagaraComponent;
+    UCameraComponent* CameraComponent;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AAA|AimBeam")
-    class UNiagaraSystem* AimBeamNiagaraSystem;
+    UPROPERTY(VisibleAnywhere)
+    USceneComponent* SceneComponent;
 
-    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AAA|AimBeam")
+    UPROPERTY(VisibleAnywhere)
+    UNiagaraComponent* AimBeamNiagaraComponent;
+
+    UPROPERTY(VisibleAnywhere)
+    UNiagaraSystem* AimBeamNiagaraSystem;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Aim Beam", meta = (DisplayPriority = "-1"))
     FName AimBeamLengthVarName = "AimBeamLength";
 
-    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AAA|AimBeam")
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Aim Beam", meta = (DisplayPriority = "-1"))
     FVector AimBeamLengthVarValue;
 
-private:
     UPROPERTY()
-    ASSSphere* CurrentRollBoll;
+    TObjectPtr<ASSSphere> CurrentRollBoll;
 
-	APlayerController* PlayerController;
+    UPROPERTY()
+    TObjectPtr<APlayerController> PlayerController;
 };

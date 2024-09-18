@@ -15,7 +15,7 @@ class SPHERESHOOTER_API ASSGameStateBase : public AGameStateBase
 	GENERATED_BODY()
 
 public:
-    SIZE_T PlayerPoints = 0;
-    uint8 MissesCount = 0;
+    SIZE_T PlayerPoints {0};
+    uint8 MissesCount {0};
 	
 };

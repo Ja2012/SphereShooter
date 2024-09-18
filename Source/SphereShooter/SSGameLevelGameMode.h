@@ -2,12 +2,13 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameModeBase.h"
-#include "SSTile.h"
 
 #include "SSGameLevelGameMode.generated.h"
 
 class ASSGrid;
 class UBallType;
+class ASSPawn;
+class ASSGameStateBase;
 
 UCLASS()
 class SPHERESHOOTER_API ASSGameLevelGameMode : public AGameModeBase
@@ -20,12 +21,12 @@ public:
     virtual void Tick(float DeltaSeconds) override;
     TObjectPtr<UBallType> GetBallType() const { return BallType; }
     FVector FindPlayerBallStartPosition() const;
+    float GetGridMoveDistance() const { return GridMoveDistance; }
+    uint8 GetNumOfGridRowsWithBalls() const { return NumOfGridRowsWithBalls; }
 
 protected:
-    void Init();
-    
     UPROPERTY()
-    ASSGrid* Grid;
+    TObjectPtr<ASSGrid> Grid;
 
     UPROPERTY()
     TSoftObjectPtr<UBallType> BallTypeSoftPtr;
@@ -37,46 +38,41 @@ protected:
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Ball", meta = (DisplayPriority = "-1"))
     FName PlayerBallPositionMarkActorTag = "PlayerBallXYLocation";
     void SetCrossLineActor();
-    
+
     // CrossLine
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Game", meta = (DisplayPriority = "-1"))
     FName CrossLineActorTag = "CrossLine";
     UPROPERTY()
     TObjectPtr<AActor> CrossLine;
 
-    
-    // Grid with balls will take all space between walls and will have this quantity of rows.
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Grid", meta = (DisplayPriority = "-1"))
-    uint8 BallRowsNum = 10;
-    
+    uint8 NumOfGridRowsWithBalls = 10;
+
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Game Rules", meta = (DisplayPriority = "-1"))
     uint8 MissesLimitNum = 5;
-    
-    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Game Rules", meta = (DisplayPriority = "-1"))
-    float GridMoveIfMissRatioToBallSize = 1.f;
 
-    // to track that 
-    uint8 CurrentGameLastRow = 0;
-    
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Game Rules", meta = (DisplayPriority = "-1"))
+    float GridMoveDistance = 1.f;
+
+    void Init();
+    void InitGrid();
     void LoadBallTypeDataAsset();
     void OnLoadBallTypeDataAsset();
-
     void SetBallCDO() const;
     void SetupRollBall() const;
-    void SetBallsGrid();
+    bool IsBallsCrossedLine() const;
+    void GameOver();
 
     UFUNCTION()
     void OnRollBallHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse,
         const FHitResult& Hit);
 
-    TObjectPtr<class APlayerController> PlayerController;
-    TObjectPtr<class ASSPawn> Pawn;
-    TObjectPtr<class ASSGameStateBase> MyGameState;
+    UPROPERTY()
+    TObjectPtr<APlayerController> PlayerController;
 
-    bool IsTileConnectedToGrid(const FTile* TargetTile) const;
-    void GetTilesNotConnectedToGrid(FTile* TargetTile, std::unordered_set<FTile*>& TilesNotConnectedToGrid);
-    void GetSameColorConnectedTiles(FTile* TargetTile,  std::unordered_set<FTile*>& SameColorConnectedTiles);
-    void MoveGridBallsDown();
-    bool CheckIfGridBallCrossRollBallY();
-    void GameOver();
+    UPROPERTY()
+    TObjectPtr<ASSPawn> Pawn;
+
+    UPROPERTY()
+    TObjectPtr<ASSGameStateBase> MyGameState;
 };

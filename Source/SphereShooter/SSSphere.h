@@ -7,6 +7,7 @@
 #include "SSSphere.generated.h"
 
 struct FTile;
+class USphereComponent;
 
 UCLASS()
 class SPHERESHOOTER_API ASSSphere : public AActor
@@ -18,18 +19,14 @@ public:
     virtual void BeginPlay() override;
     void TurnIntoRollBall();
     void TurnIntoGridBall();
-    void Roll(FVector Impulse);
+    void Roll(const FVector& Impulse) const;
 
-    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AAA")
-    class USphereComponent* SphereCollisionComponent;
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (DisplayPriority = "-1"))
+    USphereComponent* SphereCollisionComponent;
 
-    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AAA")
-    class UStaticMeshComponent* StaticMeshComponent;
-
-    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AAA")
-    float RollImpulseValue;
-
-    ESSColor Color = ESSColor::ESSC_Green;
-
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (DisplayPriority = "-1"))
+    UStaticMeshComponent* StaticMeshComponent;
+    
+    ESSColor Color = ESSColor::ESSC_NoColor;
     FTile* Tile;
 };

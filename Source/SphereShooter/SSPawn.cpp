@@ -27,17 +27,13 @@ ASSPawn::ASSPawn()
     AimBeamNiagaraComponent->SetupAttachment(SceneComponent);
 }
 
-// Called when the game starts or when spawned
 void ASSPawn::BeginPlay()
 {
     Super::BeginPlay();
 
-    PlayerController = Cast<APlayerController>(GetController());    
     GameMode = Cast<ASSGameLevelGameMode>(GetWorld()->GetAuthGameMode());
 
-    FVector PlayerBallLocation = GameMode->FindPlayerBallStartPosition();
-    PlayerBallLocation.Z += 1;
-    AimBeamNiagaraComponent->SetWorldLocation(PlayerBallLocation);
+    AimBeamNiagaraComponent->SetWorldLocation(GameMode->FindPlayerBallStartPosition() + FVector(0, 0, 1.f));
     AimBeamNiagaraComponent->SetAsset(AimBeamNiagaraSystem);
     AimBeamNiagaraComponent->SetVariableVec3(AimBeamLengthVarName, AimBeamLengthVarValue);
 }
@@ -48,37 +44,17 @@ void ASSPawn::ShootRollBall(const FInputActionValue& Value)
     Roll(AimBeamNiagaraComponent->GetForwardVector() * ShootScaleImpulse);
 }
 
-void ASSPawn::MoveAimBeam(const FInputActionValue& Value) 
+void ASSPawn::MoveAimBeam(const FInputActionValue& Value)
 {
     if (!AimBeamNiagaraComponent) return;
-    float MouseXDelta = Value.Get<float>();
-    AimBeamNiagaraComponent->AddRelativeRotation(FRotator(0.f, MouseXDelta, 0.f));
-
-    // TODO bad aim tracking
-    return;
-
-    float X, Y;
-    PlayerController->GetMousePosition(X, Y);
-    GEngine->AddOnScreenDebugMessage(2, 0.f, FColor::Green, FString::Printf(TEXT("%f, %f"), X, Y), false);
-
-    // https://forums.unrealengine.com/t/c-equivalent-of-convert-mouse-location-to-world-space/296018/7?u=ja20121
-    FVector MouseLoc; 
-    FVector MouseDir; 
-    PlayerController->DeprojectMousePositionToWorld(MouseLoc, MouseDir);
+    AimBeamNiagaraComponent->AddRelativeRotation(FRotator(0.f, Value.Get<float>(), 0.f));
 }
 
-// Called every frame
-void ASSPawn::Tick(float DeltaTime)
-{
-    Super::Tick(DeltaTime);
-}
-
-// Called to bind functionality to input
 void ASSPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
     Super::SetupPlayerInputComponent(PlayerInputComponent);
 
-    if(UEnhancedInputComponent* Input = Cast<UEnhancedInputComponent>(PlayerInputComponent))
+    if (UEnhancedInputComponent* Input = Cast<UEnhancedInputComponent>(PlayerInputComponent))
     {
         Input->BindAction(ShootAction, ETriggerEvent::Triggered, this, &ASSPawn::ShootRollBall);
         Input->BindAction(MouseMoveAction, ETriggerEvent::Triggered, this, &ASSPawn::MoveAimBeam);
@@ -91,24 +67,20 @@ void ASSPawn::PawnClientRestart()
 
     if (APlayerController* PC = Cast<APlayerController>(GetController()))
     {
-		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PC->GetLocalPlayer()))
-		{
-			Subsystem->ClearAllMappings();
+        if (UEnhancedInputLocalPlayerSubsystem* Subsystem = //
+            ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PC->GetLocalPlayer()))
+        {
+            Subsystem->ClearAllMappings();
             Subsystem->AddMappingContext(InputMappingContext, 0);
-		}
+        }
     }
 }
 
-void ASSPawn::SetRollBall(ASSSphere* Ball)
+void ASSPawn::Roll(const FVector& Impulse)
 {
-    CurrentRollBoll = Ball;
-}
-
-void ASSPawn::Roll(FVector Impulse) 
-{
-    if(CurrentRollBoll)
+    if (CurrentRollBoll)
     {
-        CurrentRollBoll->Roll(Impulse);        
+        CurrentRollBoll->Roll(Impulse);
         CurrentRollBoll = nullptr;
     }
 }
