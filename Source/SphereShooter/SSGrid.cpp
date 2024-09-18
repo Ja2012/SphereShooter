@@ -79,7 +79,7 @@ void ASSGrid::GenerateGrid()
 void ASSGrid::SetValidNeighbor(FTile& Tile, const FTileMemberPtr TileMemberPtr)
 {
 
-    uint32 ID;
+    uint32 ID = 10000;
     const bool bIsOddRow = Tile.Row % 2 ? true : false;
     if (TileMemberPtr == &FTile::TopLeft)
     {
@@ -105,7 +105,6 @@ void ASSGrid::SetValidNeighbor(FTile& Tile, const FTileMemberPtr TileMemberPtr)
     {
         ID = RowColumnToID(Tile.Row + 1, bIsOddRow ? Tile.Column + 1 : Tile.Column);
     }
-    else checkNoEntry();
 
     if (!Tiles.IsValidIndex(ID))
     {

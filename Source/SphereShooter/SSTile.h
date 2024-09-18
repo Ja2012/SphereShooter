@@ -31,14 +31,14 @@ struct FTile
     bool Empty() const { return Ball == nullptr; };
 
     uint32 ID{0};
-    TWeakObjectPtr<class ASSSphere> Ball = nullptr;
-    ESSColor Color = ESSColor::ESSC_NoColor;
+    FVector Location{0, 0, 0};
     uint8 Row{0};
     uint8 Column{0};
-    FVector Location{0, 0, 0};
-    
     bool bIsOutOfRightEdge = false;
     bool bIsTopTile = false;
+    TWeakObjectPtr<class ASSSphere> Ball = nullptr;
+    ESSColor Color = ESSColor::ESSC_NoColor;
+    
     
     FTile* Left = nullptr;
     FTile* Right = nullptr;
