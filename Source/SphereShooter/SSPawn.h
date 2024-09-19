@@ -20,54 +20,53 @@ class SPHERESHOOTER_API ASSPawn : public APawn
 
 public:
     ASSPawn();
-
-    virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+    virtual void BeginPlay() override;
     virtual void PawnClientRestart() override;
-    
+
     void SetRollBall(ASSSphere* Ball) { CurrentRollBoll = Ball; }
     ASSSphere* GetRollBall() const { return CurrentRollBoll; }
-    void Roll(const FVector& Impulse);
+    void Roll(const FVector& Impulse);    
 
 protected:
-    virtual void BeginPlay() override;
-
-    UPROPERTY()
-    ASSGameLevelGameMode* GameMode;
-
-    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "MyInput", meta = (DisplayPriority = "-1"))
-    UInputMappingContext* InputMappingContext;
-
-    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "MyInput", meta = (DisplayPriority = "-1"))
-    UInputAction* ShootAction;
-
-    UFUNCTION()
-    void ShootRollBall(const FInputActionValue& Value);
-
-    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "MyInput", meta = (DisplayPriority = "-1"))
-    float ShootScaleImpulse = 2000.f;
-
-    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "MyInput", meta = (DisplayPriority = "-1"))
-    UInputAction* MouseMoveAction;
+    virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
     UFUNCTION()
     void MoveAimBeam(const FInputActionValue& Value);
 
-    UPROPERTY(VisibleAnywhere)
-    UCameraComponent* CameraComponent;
+    UFUNCTION()
+    void ShootRollBall(const FInputActionValue& Value);
+    
+    UPROPERTY()
+    TObjectPtr<ASSGameLevelGameMode> GameMode;
+
+    UPROPERTY(EditDefaultsOnly, Category = "qq|Input")
+    TObjectPtr<UInputMappingContext> InputMappingContext;
+
+    UPROPERTY(EditDefaultsOnly, Category = "qq|Input")
+    TObjectPtr<UInputAction> ShootAction;
+
+    UPROPERTY(EditDefaultsOnly, Category = "qq|Input")
+    float ShootScaleImpulse = 2000.f;
+
+    UPROPERTY(EditDefaultsOnly, Category = "qq|Input")
+    TObjectPtr<UInputAction> MouseMoveAction;
 
     UPROPERTY(VisibleAnywhere)
-    USceneComponent* SceneComponent;
+    TObjectPtr<UCameraComponent> CameraComponent;
 
     UPROPERTY(VisibleAnywhere)
-    UNiagaraComponent* AimBeamNiagaraComponent;
+    TObjectPtr<USceneComponent> SceneComponent;
 
     UPROPERTY(VisibleAnywhere)
-    UNiagaraSystem* AimBeamNiagaraSystem;
+    TObjectPtr<UNiagaraComponent> AimBeamNiagaraComponent;
 
-    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Aim Beam", meta = (DisplayPriority = "-1"))
+    UPROPERTY(VisibleAnywhere, Category = "qq|VFX")
+    TObjectPtr<UNiagaraSystem> AimBeamNiagaraSystem;
+
+    UPROPERTY(EditDefaultsOnly, Category = "qq|VFX")
     FName AimBeamLengthVarName = "AimBeamLength";
 
-    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Aim Beam", meta = (DisplayPriority = "-1"))
+    UPROPERTY(EditDefaultsOnly, Category = "qq|VFX")
     FVector AimBeamLengthVarValue;
 
     UPROPERTY()

@@ -16,17 +16,19 @@ class SPHERESHOOTER_API ASSSphere : public AActor
 
 public:
     ASSSphere();
-    virtual void BeginPlay() override;
     void TurnIntoRollBall();
     void TurnIntoGridBall();
     void Roll(const FVector& Impulse) const;
 
-    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (DisplayPriority = "-1"))
-    USphereComponent* SphereCollisionComponent;
+    UPROPERTY(VisibleAnywhere)
+    TObjectPtr<USphereComponent> SphereCollisionComponent;
 
-    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (DisplayPriority = "-1"))
-    UStaticMeshComponent* StaticMeshComponent;
+    UPROPERTY(VisibleAnywhere)
+    TObjectPtr<UStaticMeshComponent> StaticMeshComponent;
     
     ESSColor Color = ESSColor::ESSC_NoColor;
     FTile* Tile;
+    
+protected:
+    virtual void BeginPlay() override;
 };

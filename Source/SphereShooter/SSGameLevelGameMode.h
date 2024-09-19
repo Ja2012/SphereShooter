@@ -1,10 +1,12 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "SSColor.h"
 #include "GameFramework/GameModeBase.h"
 
 #include "SSGameLevelGameMode.generated.h"
 
+struct FTile;
 class ASSGrid;
 class UBallType;
 class ASSPawn;
@@ -17,14 +19,16 @@ class SPHERESHOOTER_API ASSGameLevelGameMode : public AGameModeBase
 
 public:
     ASSGameLevelGameMode();
-    virtual void BeginPlay() override;
     virtual void Tick(float DeltaSeconds) override;
+    
     TObjectPtr<UBallType> GetBallType() const { return BallType; }
     FVector FindPlayerBallStartPosition() const;
     float GetGridMoveDistance() const { return GridMoveDistance; }
     uint8 GetNumOfGridRowsWithBalls() const { return NumOfGridRowsWithBalls; }
 
 protected:
+    virtual void BeginPlay() override;
+    
     UPROPERTY()
     TObjectPtr<ASSGrid> Grid;
 
@@ -35,23 +39,24 @@ protected:
     TObjectPtr<UBallType> BallType;
 
     // tag of scene actor that point to player roll ball start position
-    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Ball", meta = (DisplayPriority = "-1"))
+    UPROPERTY(EditDefaultsOnly, Category = "qq")
     FName PlayerBallPositionMarkActorTag = "PlayerBallXYLocation";
     void SetCrossLineActor();
 
     // CrossLine
-    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Game", meta = (DisplayPriority = "-1"))
+    UPROPERTY(EditDefaultsOnly, Category = "qq")
     FName CrossLineActorTag = "CrossLine";
+
     UPROPERTY()
     TObjectPtr<AActor> CrossLine;
 
-    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Grid", meta = (DisplayPriority = "-1"))
+    UPROPERTY(EditAnywhere, Category = "qq")
     uint8 NumOfGridRowsWithBalls = 10;
 
-    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Game Rules", meta = (DisplayPriority = "-1"))
+    UPROPERTY(EditAnywhere, Category = "qq")
     uint8 MissesLimitNum = 5;
 
-    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Game Rules", meta = (DisplayPriority = "-1"))
+    UPROPERTY(EditAnywhere, Category = "qq")
     float GridMoveDistance = 1.f;
 
     void Init();
@@ -59,7 +64,7 @@ protected:
     void LoadBallTypeDataAsset();
     void OnLoadBallTypeDataAsset();
     void SetBallCDO() const;
-    void SetupRollBall() const;
+    void SetupRollBall(ESSColor Color = ESSColor::ESSC_NoColor) const;
     bool IsBallsCrossedLine() const;
     void GameOver();
 
@@ -67,6 +72,10 @@ protected:
     void OnRollBallHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse,
         const FHitResult& Hit);
 
+    void AddPoints(const uint8 StrikeCount, const uint8 DropCount) const;
+    void HandleMisses() const;
+    uint8 HandleStrikes(const std::unordered_set<FTile*>& SameColorTiles) const;
+    
     UPROPERTY()
     TObjectPtr<APlayerController> PlayerController;
 

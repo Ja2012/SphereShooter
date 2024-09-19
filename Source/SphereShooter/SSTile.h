@@ -10,10 +10,8 @@
  */
 struct FTile
 {
-    FTile(uint32 ID, FVector Location, uint8 Row, uint8 Column, bool bIsOutOfRightEdge = false, bool bIsTopTile = false)
-        : ID(ID), Location(Location), Row(Row), Column(Column), bIsOutOfRightEdge(bIsOutOfRightEdge)
-    {
-    }
+    FTile(const uint32 ID, const FVector& Location, const uint8 Row, const uint8 Column, const bool bIsOutOfRightEdge = false): //
+    ID(ID), Location(Location), Row(Row), Column(Column), bIsOutOfRightEdge(bIsOutOfRightEdge) {}
 
     void Reset()
     {

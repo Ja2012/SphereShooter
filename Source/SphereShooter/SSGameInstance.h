@@ -13,7 +13,7 @@ class SPHERESHOOTER_API USSGameInstance : public UGameInstance
 
 public:
     TSoftObjectPtr<UBallType> GetCurrentBallType() { return CurrentBallType; }
-    void SetCurrentBallTape(TSoftObjectPtr<UBallType> BallTypeSoftPtr) { CurrentBallType = BallTypeSoftPtr; }
+    void SetCurrentBallTape(const TSoftObjectPtr<UBallType>& BallTypeSoftPtr) { CurrentBallType = BallTypeSoftPtr; }
 
 private:
     UPROPERTY(EditAnywhere)

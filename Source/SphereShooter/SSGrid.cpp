@@ -49,8 +49,7 @@ void ASSGrid::GenerateGrid()
             const FVector TileCenter = FVector(TileCenterX, TileCenterY, TileCenterZ);
             Tiles.Emplace(Row * ColumnsNum + Column, TileCenter, Row, Column, //
                 // make sure that last column in each odd row will be empty (because it is out of right edge of game field)
-                Row % 2 == 1 && Column == ColumnsNum - 1 ? true : false,
-                Row == 0 ? true : false);
+                Row % 2 == 1 && Column == ColumnsNum - 1 ? true : false);
             
             // TODO debug
             DrawDebugCrosshairs(GetWorld(), Tiles[RowColumnToID(Row, Column)].Location, FRotator::ZeroRotator, 30, FColor::Red, true, -1,

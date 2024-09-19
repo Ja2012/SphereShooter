@@ -20,22 +20,7 @@ class SPHERESHOOTER_API ASSGrid : public AActor
 public:
     ASSGrid();
     void GenerateGrid();
-
-    void IDToRowColumn(const uint32 ID, uint8& OutRow, uint8& OutCurrentColumn) const
-    {
-        OutRow = ID / ColumnsNum;
-        OutCurrentColumn = ID % ColumnsNum;
-    }
-
-    uint32 RowColumnToID(const uint8 Row, const uint8 CurrentColumn) const
-    {
-        return Row * ColumnsNum + CurrentColumn;
-    };
-
-    TArray<FTile> Tiles{};
-    uint8 ColumnsNum{0};
-    uint8 RowsNum{0};
-
+    
     const FTile* GetLowestTileWithBall() const
     {
         return &Tiles[ //
@@ -50,6 +35,21 @@ public:
     void SpawnBalls();
 
 protected:
+    TArray<FTile> Tiles{};
+    uint8 ColumnsNum{0};
+    uint8 RowsNum{0};
     using FTileMemberPtr = FTile* FTile::*;
     void SetNeighbor(FTile& Tile, const FTileMemberPtr TileMember);
+    
+    void IDToRowColumn(const uint32 ID, uint8& OutRow, uint8& OutCurrentColumn) const
+    {
+        OutRow = ID / ColumnsNum;
+        OutCurrentColumn = ID % ColumnsNum;
+    }
+
+    uint32 RowColumnToID(const uint8 Row, const uint8 CurrentColumn) const
+    {
+        return Row * ColumnsNum + CurrentColumn;
+    };
+    
 };
