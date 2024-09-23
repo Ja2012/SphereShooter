@@ -9,8 +9,10 @@
 #include "Components/SphereComponent.h"
 #include "DrawDebugHelpers.h"
 #include "SSGameStateBase.h"
+#include "NativeGameplayTags.h"
 
 #include <unordered_set>
+
 
 DEFINE_LOG_CATEGORY_STATIC(ASSGameLevelGameModeLog, All, All);
 
@@ -26,28 +28,34 @@ ASSGameLevelGameMode::ASSGameLevelGameMode()
 void ASSGameLevelGameMode::BeginPlay()
 {
     Super::BeginPlay();
+    SetKeyActors();
 
     PlayerController = GetWorld()->GetFirstPlayerController<APlayerController>();
     Pawn = Cast<ASSPawn>(PlayerController->GetPawn());
     MyGameState = GetGameState<ASSGameStateBase>();
 
     LoadBallTypeDataAsset();
-    SetCrossLineActor();
 }
 
 void ASSGameLevelGameMode::Init()
 {
     SetBallCDO();
-    SetupRollBall();
+    SetRollBall();
     InitGrid();
 }
 
-void ASSGameLevelGameMode::SetCrossLineActor()
+void ASSGameLevelGameMode::SetKeyActors()
 {
-    TArray<AActor*> Array;
-    UGameplayStatics::GetAllActorsWithTag(this, CrossLineActorTag, Array);
-    checkf(Array.Num() != 0, TEXT("No actor with tag %s"), *CrossLineActorTag.ToString());
-    CrossLine = Array[0];
+    TArray<AActor*> TaggedActors;
+    UGameplayStatics::GetAllActorsOfClass(GetWorld(), ASSTaggedActor::StaticClass(), TaggedActors);
+    
+    for (AActor* Actor : TaggedActors)
+    {
+        const IGameplayTagAssetInterface* Interface = Cast<IGameplayTagAssetInterface>(Actor);
+        if (Interface->HasMatchingGameplayTag(Tag_Grid)) Grid = Cast<ASSGrid>(Actor);
+        else if (Interface->HasMatchingGameplayTag(Tag_RollBallSpawn)) RollBallSpawn = Actor;
+        else if (Interface->HasMatchingGameplayTag(Tag_CrossLine)) CrossLine = Actor;
+    }
 }
 
 void ASSGameLevelGameMode::Tick(float DeltaSeconds)
@@ -59,14 +67,6 @@ void ASSGameLevelGameMode::Tick(float DeltaSeconds)
         "Points: " + FString::FromInt(MyGameState->PlayerPoints) + "\n" + //
         "Misses: " + FString::FromInt(MyGameState->MissesCount)};
     GEngine->AddOnScreenDebugMessage(0, 0.f, FColor::Red, DebugMessage, false, FVector2d(2.f, 2.f));
-}
-
-FVector ASSGameLevelGameMode::FindPlayerBallStartPosition() const
-{
-    TArray<AActor*> Array;
-    UGameplayStatics::GetAllActorsWithTag(this, PlayerBallPositionMarkActorTag, Array);
-    checkf(Array.Num() != 0, TEXT("No actor with tag %s"), *PlayerBallPositionMarkActorTag.ToString());
-    return Array[0]->GetActorLocation();
 }
 
 void ASSGameLevelGameMode::LoadBallTypeDataAsset()
@@ -84,9 +84,9 @@ void ASSGameLevelGameMode::OnLoadBallTypeDataAsset()
     Init();
 }
 
-void ASSGameLevelGameMode::SetupRollBall(ESSColor Color) const
+void ASSGameLevelGameMode::SetRollBall(ESSColor Color) const
 {
-    const FVector PlayerBallLocation = FindPlayerBallStartPosition();
+    const FVector PlayerBallLocation = RollBallSpawn->GetActorLocation();
     // spawn
     const FTransform SpawnTransform{
         FRotator::ZeroRotator, FVector(PlayerBallLocation.X, PlayerBallLocation.Y, BallType->MeshDiameter / 2.f), FVector(1.f)};
@@ -139,13 +139,7 @@ void ASSGameLevelGameMode::OnRollBallHit(UPrimitiveComponent* HitComponent, AAct
     // find GridBall neighbours and sort them in ascending distance to GridBall
     FVector HitPointLoc = Hit.ImpactPoint;
     TArray<FTile*> GridBallTileNeighbours;
-    Algo::CopyIf(GridBall->Tile->Neighbors, GridBallTileNeighbours, //
-        [](const FTile* NeighbourTile) { return NeighbourTile != nullptr; });
-    Algo::Sort(GridBallTileNeighbours, //
-        [&HitPointLoc](const FTile* A, const FTile* B)
-        {
-            return (A->Location - HitPointLoc).Length() < (B->Location - HitPointLoc).Length();
-        });
+    Grid->GetTilesNeighboursCloseToPointSorted(Hit.ImpactPoint, GridBall->Tile, GridBallTileNeighbours);
 
     // find most close empty tile to land 
     FTile* TileToLand = nullptr;
@@ -176,7 +170,7 @@ void ASSGameLevelGameMode::OnRollBallHit(UPrimitiveComponent* HitComponent, AAct
     if (!TileToLand || (TileToLand && !TileToLand->Empty()))
     {
         ensureMsgf(false, TEXT("Roll Ball out of edge!!!"));
-        SetupRollBall(RollBall->Color);
+        SetRollBall(RollBall->Color);
         RollBall->Destroy();
         return;
     }
@@ -209,13 +203,13 @@ void ASSGameLevelGameMode::OnRollBallHit(UPrimitiveComponent* HitComponent, AAct
 
     AddPoints(StrikeCount, DropCount);
     if (!DropCount && !StrikeCount) HandleMisses();
-    SetupRollBall();
-
     if (IsBallsCrossedLine())
     {
         GameOver();
         return;
     }
+    
+    SetRollBall();
 }
 
 void ASSGameLevelGameMode::AddPoints(const uint8 StrikeCount, const uint8 DropCount) const

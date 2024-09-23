@@ -16,9 +16,9 @@ ASSGrid::ASSGrid()
 
 void ASSGrid::GenerateGrid()
 {
-    const ASSGameLevelGameMode* GameMode = Cast<ASSGameLevelGameMode>(GetWorld()->GetAuthGameMode());
+    ASSGameLevelGameMode* GameMode = Cast<ASSGameLevelGameMode>(GetWorld()->GetAuthGameMode());
     const float BallSize = GameMode->GetBallType()->MeshDiameter;
-    const FVector PlayerBallLocation = GameMode->FindPlayerBallStartPosition();
+    const FVector PlayerBallLocation = GameMode->GerRollBall()->GetActorLocation();
     const FVector GridStartLoc = GetActorLocation();
 
     const float TileWidth = BallSize;
@@ -188,6 +188,18 @@ void ASSGrid::GetSameColorConnectedTilesWithBalls(FTile* TargetTile, std::unorde
             Frontier.push_back(Tile);
         }
     }
+}
+
+void ASSGrid::GetTilesNeighboursCloseToPointSorted(const FVector& PointLoc, const FTile* TargetTile, TArray<FTile*>& TilesCloseToPoint)
+{
+    Algo::CopyIf(TargetTile->Neighbors, TilesCloseToPoint, //
+    [](const FTile* NeighbourTile) { return NeighbourTile != nullptr; });
+    Algo::Sort(TilesCloseToPoint, //
+        [&PointLoc](const FTile* A, const FTile* B)
+        {
+            return (A->Location - PointLoc).Length() < (B->Location - PointLoc).Length();
+        });
+
 }
 
 void ASSGrid::GetTilesWithBallsNotConnectedToTop(FTile* TargetTile, std::unordered_set<FTile*>& TilesNotConnectedToGrid)

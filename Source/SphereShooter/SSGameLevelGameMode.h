@@ -6,6 +6,9 @@
 
 #include "SSGameLevelGameMode.generated.h"
 
+class ASSTaggedActor;
+class ASSSphere;
+struct FGameplayTag;
 struct FTile;
 class ASSGrid;
 class UBallType;
@@ -22,15 +25,25 @@ public:
     virtual void Tick(float DeltaSeconds) override;
     
     TObjectPtr<UBallType> GetBallType() const { return BallType; }
-    FVector FindPlayerBallStartPosition() const;
     float GetGridMoveDistance() const { return GridMoveDistance; }
     uint8 GetNumOfGridRowsWithBalls() const { return NumOfGridRowsWithBalls; }
-
+    AActor* GerRollBall()
+    {
+        if (!RollBallSpawn) SetKeyActors();
+        return RollBallSpawn;
+    }
+    
 protected:
     virtual void BeginPlay() override;
     
     UPROPERTY()
     TObjectPtr<ASSGrid> Grid;
+    
+    UPROPERTY()
+    TObjectPtr<AActor> RollBallSpawn;
+
+    UPROPERTY()
+    TObjectPtr<AActor> CrossLine;
 
     UPROPERTY()
     TSoftObjectPtr<UBallType> BallTypeSoftPtr;
@@ -41,15 +54,8 @@ protected:
     // tag of scene actor that point to player roll ball start position
     UPROPERTY(EditDefaultsOnly, Category = "qq")
     FName PlayerBallPositionMarkActorTag = "PlayerBallXYLocation";
-    void SetCrossLineActor();
-
-    // CrossLine
-    UPROPERTY(EditDefaultsOnly, Category = "qq")
-    FName CrossLineActorTag = "CrossLine";
-
-    UPROPERTY()
-    TObjectPtr<AActor> CrossLine;
-
+    void SetKeyActors();
+    
     UPROPERTY(EditAnywhere, Category = "qq")
     uint8 NumOfGridRowsWithBalls = 10;
 
@@ -64,7 +70,7 @@ protected:
     void LoadBallTypeDataAsset();
     void OnLoadBallTypeDataAsset();
     void SetBallCDO() const;
-    void SetupRollBall(ESSColor Color = ESSColor::ESSC_NoColor) const;
+    void SetRollBall(ESSColor Color = ESSColor::ESSC_NoColor) const;
     bool IsBallsCrossedLine() const;
     void GameOver();
 

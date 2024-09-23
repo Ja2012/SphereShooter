@@ -3,9 +3,13 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "SSTaggedActor.h"
 #include "SSTile.h"
+#include "Tags.h"
 #include "SSGrid.generated.h"
 
+
+struct FGameplayTag;
 
 /**
  * Should be placed in top left corner of available game field (inside walls)
@@ -13,7 +17,7 @@
  * and columns go from "up" +X to "down" -X
  */
 UCLASS()
-class SPHERESHOOTER_API ASSGrid : public AActor
+class SPHERESHOOTER_API ASSGrid : public ASSTaggedActor
 {
     GENERATED_BODY()
 
@@ -31,6 +35,7 @@ public:
     static bool IsTileWithBallConnectedToTop(const FTile* TargetTile);
     static void GetTilesWithBallsNotConnectedToTop(FTile* TargetTile, std::unordered_set<FTile*>& TilesNotConnectedToGrid);
     static void GetSameColorConnectedTilesWithBalls(FTile* TargetTile, std::unordered_set<FTile*>& SameColorConnectedTiles);
+    static void GetTilesNeighboursCloseToPointSorted(const FVector& PointLoc, const FTile* TargetTile, TArray<FTile*>& TilesCloseToPoint);
     void MoveDown();
     void SpawnBalls();
 
@@ -51,5 +56,4 @@ protected:
     {
         return Row * ColumnsNum + CurrentColumn;
     };
-    
 };
