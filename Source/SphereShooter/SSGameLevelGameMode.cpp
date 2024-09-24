@@ -108,7 +108,7 @@ void ASSGameLevelGameMode::SetRollBall(ESSColor Color) const
 
     // finish
     RollBall->FinishSpawning(SpawnTransform);
-    Pawn->SetRollBall(RollBall);
+    if (Pawn) Pawn->SetRollBall(RollBall);
     RollBall->SphereCollisionComponent->OnComponentHit.AddDynamic(this, &ASSGameLevelGameMode::OnRollBallHit);
 }
 
