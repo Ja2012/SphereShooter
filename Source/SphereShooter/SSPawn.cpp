@@ -17,9 +17,9 @@ ASSPawn::ASSPawn()
     SetRootComponent(SceneComponent);
 
     CameraComponent = CreateDefaultSubobject<UCameraComponent>("CameraComponent");
-    CameraComponent->SetProjectionMode(ECameraProjectionMode::Orthographic);
-    CameraComponent->SetOrthoWidth(1920.f);
-    CameraComponent->SetConstraintAspectRatio(true);
+    // CameraComponent->SetProjectionMode(ECameraProjectionMode::Orthographic);
+    // CameraComponent->SetOrthoWidth(1920.f);
+    // CameraComponent->SetConstraintAspectRatio(true);
     CameraComponent->bUsePawnControlRotation = true;
     CameraComponent->SetupAttachment(SceneComponent);
 
