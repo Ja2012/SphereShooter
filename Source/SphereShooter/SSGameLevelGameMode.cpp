@@ -132,9 +132,9 @@ void ASSGameLevelGameMode::OnRollBallHit(UPrimitiveComponent* HitComponent, AAct
 
     // TODO debug
     UE_LOG(LogTemp, Display, TEXT("HIT!!! with yaw: %.2f"), HitNormalYaw);
-    DrawDebugDirectionalArrow(GetWorld(), Hit.ImpactPoint, Hit.ImpactPoint + Hit.ImpactNormal * 100.f, BallType->MeshDiameter,
-        FColor::White, false, 5, -1,
-        3);
+    // DrawDebugDirectionalArrow(GetWorld(), Hit.ImpactPoint, Hit.ImpactPoint + Hit.ImpactNormal * 100.f, BallType->MeshDiameter,
+    //     FColor::White, false, 5, -1,
+    //     3);
 
     // find GridBall neighbours and sort them in ascending distance to GridBall
     FVector HitPointLoc = Hit.ImpactPoint;

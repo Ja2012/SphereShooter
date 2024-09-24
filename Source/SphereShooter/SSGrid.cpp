@@ -52,8 +52,8 @@ void ASSGrid::GenerateGrid()
                 Row % 2 == 1 && Column == ColumnsNum - 1 ? true : false);
             
             // TODO debug
-            DrawDebugCrosshairs(GetWorld(), Tiles[RowColumnToID(Row, Column)].Location, FRotator::ZeroRotator, 30, FColor::Red, true, -1,
-                0);
+            // DrawDebugCrosshairs(GetWorld(), Tiles[RowColumnToID(Row, Column)].Location, FRotator::ZeroRotator, 30, FColor::Red, true, -1,
+            //     0);
         }
     }
 
@@ -154,7 +154,7 @@ void ASSGrid::MoveDown()
     const TObjectPtr<UBallType> BallType = GameMode->GetBallType();
     
     // todo debug
-    FlushPersistentDebugLines(GetWorld());
+    // FlushPersistentDebugLines(GetWorld());
     
     const FVector MoveVector {-BallType->MeshDiameter * GameMode->GetGridMoveDistance(), 0, 0};
     SetActorLocation(GetActorLocation() + MoveVector);
@@ -164,8 +164,8 @@ void ASSGrid::MoveDown()
         Tile.Location += MoveVector;
         
         // todo debug
-        DrawDebugCrosshairs(GetWorld(), Tile.Location, FRotator::ZeroRotator, 30, FColor::Red, true, -1,
-    0);
+    //     DrawDebugCrosshairs(GetWorld(), Tile.Location, FRotator::ZeroRotator, 30, FColor::Red, true, -1,
+    // 0);
         
         if (Tile.Empty()) continue;
         Tile.Ball->SetActorLocation(Tile.Location);
