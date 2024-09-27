@@ -1,7 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "SSColor.h"
+#include "../Auxiliary/SSColor.h"
 #include "GameFramework/GameModeBase.h"
 
 #include "SSGameLevelGameMode.generated.h"

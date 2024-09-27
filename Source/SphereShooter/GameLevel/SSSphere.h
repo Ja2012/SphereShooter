@@ -2,7 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "SSColor.h"
+#include "../Auxiliary/SSColor.h"
 
 #include "SSSphere.generated.h"
 

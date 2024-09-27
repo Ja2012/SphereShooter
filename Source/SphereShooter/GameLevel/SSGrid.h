@@ -3,9 +3,9 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "SSTaggedActor.h"
-#include "SSTile.h"
-#include "Tags.h"
+#include "../Auxiliary/SSTaggedActor.h"
+#include "../Auxiliary/SSTile.h"
+#include "../Auxiliary/Tags.h"
 #include "SSGrid.generated.h"
 
 

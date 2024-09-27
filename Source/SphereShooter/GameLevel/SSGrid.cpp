@@ -2,7 +2,7 @@
 
 #include "SSGrid.h"
 #include "SSGameLevelGameMode.h"
-#include "BallType.h"
+#include "../Auxiliary/BallType.h"
 
 #include <unordered_map>
 

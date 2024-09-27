@@ -2,7 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "Engine/GameInstance.h"
-#include "BallType.h"
+#include "Auxiliary/BallType.h"
 
 #include "SSGameInstance.generated.h"
 

@@ -3,12 +3,12 @@
 #include "SSSphere.h"
 #include "Kismet/GameplayStatics.h"
 #include "SSGrid.h"
-#include "SSGameInstance.h"
-#include "BallType.h"
+#include "../SSGameInstance.h"
+#include "../Auxiliary/BallType.h"
 #include "Engine/AssetManager.h"
 #include "Components/SphereComponent.h"
 #include "DrawDebugHelpers.h"
-#include "SSGameStateBase.h"
+#include "../SSGameStateBase.h"
 #include "NativeGameplayTags.h"
 
 #include <unordered_set>
