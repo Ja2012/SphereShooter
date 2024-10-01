@@ -1,10 +1,17 @@
 // LICENSE.md
 
-
 #include "SSMainMenuWidget.h"
-#include "Components/Button.h"
 
-void USSMainMenuWidget::NativeOnInitialized() 
+#include "Auxiliary/SSLevelData.h"
+#include "SSLevelItemWidget.h"
+
+#include "Components/Button.h"
+#include "Components/HorizontalBox.h"
+#include "Kismet/KismetSystemLibrary.h"
+#include "Kismet/GameplayStatics.h"
+
+
+void USSMainMenuWidget::NativeOnInitialized()
 {
     Super::NativeOnInitialized();
 
@@ -16,15 +23,73 @@ void USSMainMenuWidget::NativeOnInitialized()
     {
         ExitButton->OnClicked.AddDynamic(this, &USSMainMenuWidget::OnExit);
     }
+    InitLevelItems();
 }
 
 void USSMainMenuWidget::OnStart()
 {
-    UE_LOG(LogTemp, Display, TEXT("OnStart"));
+    USSGameInstance* SSGameInstance = GetSTUGameInstance();
+    if (!SSGameInstance) return;
+
+    UGameplayStatics::OpenLevel(this, SSGameInstance->GetStartupLevel()->LevelName);
 }
 
 void USSMainMenuWidget::OnExit()
 {
-    UE_LOG(LogTemp, Display, TEXT("OnExit"));
+    UKismetSystemLibrary::QuitGame(this, GetOwningPlayer(), EQuitPreference::Quit, true);
 }
 
+void USSMainMenuWidget::InitLevelItems()
+{
+    USSGameInstance* SSGameInstance = GetSTUGameInstance();
+    if (!SSGameInstance) return;
+
+    checkf(SSGameInstance->GetLevels()->Num() != 0, TEXT("no levels"));
+
+    if (!LevelItemsBox) return;
+    LevelItemsBox->ClearChildren();
+
+    for (const FSSLevelData& LevelData : *SSGameInstance->GetLevels())
+    {
+        USSLevelItemWidget* LevelItemWidget = CreateWidget<USSLevelItemWidget>(GetWorld(), LevelItemWidgetClass);
+        if (!LevelItemWidget) continue;
+
+        LevelItemWidget->SetLevelData(LevelData);
+        LevelItemWidget->OnLevelSelected.AddUObject(this, &USSMainMenuWidget::OnLevelSelected);
+
+        LevelItemsBox->AddChild(LevelItemWidget);
+        LevelItemWidgets.Add(LevelItemWidget);
+    }
+
+    if (!SSGameInstance->GetStartupLevel())
+    {
+        OnLevelSelected(SSGameInstance->GetLevels()->GetData());
+    }
+    else
+    {
+        OnLevelSelected(SSGameInstance->GetStartupLevel());
+    }
+}
+
+void USSMainMenuWidget::OnLevelSelected(FSSLevelData* Data)
+{
+    USSGameInstance* SSGameInstance = GetSTUGameInstance();
+    if (!SSGameInstance) return;
+
+    SSGameInstance->SetStartupLevel(Data);
+
+    for (USSLevelItemWidget* LevelItemWidget : LevelItemWidgets)
+    {
+        if (LevelItemWidget)
+        {
+            const bool IsSelected = Data->LevelName == LevelItemWidget->GetLevelData().LevelName;
+            LevelItemWidget->SetSelected(IsSelected);
+        }
+    }
+}
+
+USSGameInstance* USSMainMenuWidget::GetSTUGameInstance() const
+{
+    if (!GetWorld()) return nullptr;
+    return GetWorld()->GetGameInstance<USSGameInstance>();
+}

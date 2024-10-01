@@ -1,7 +1,8 @@
 #pragma once
 
+#include "SphereShooter/Auxiliary/SSColor.h"
+
 #include "CoreMinimal.h"
-#include "../Auxiliary/SSColor.h"
 #include "GameFramework/GameModeBase.h"
 
 #include "SSGameLevelGameMode.generated.h"

@@ -2,6 +2,7 @@
 
 
 #include "SSMainMenuHUD.h"
+
 #include "SSMainMenuWidget.h"
 
 void ASSMainMenuHUD::BeginPlay() 

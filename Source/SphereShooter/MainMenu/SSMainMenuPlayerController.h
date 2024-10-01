@@ -4,11 +4,10 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
+
 #include "SSMainMenuPlayerController.generated.h"
 
-/**
- * 
- */
+
 UCLASS()
 class SPHERESHOOTER_API ASSMainMenuPlayerController : public APlayerController
 {

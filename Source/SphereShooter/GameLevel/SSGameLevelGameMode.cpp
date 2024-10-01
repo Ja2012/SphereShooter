@@ -1,14 +1,17 @@
 #include "SSGameLevelGameMode.h"
+
+#include "Auxiliary/BallType.h"
 #include "SSPawn.h"
 #include "SSSphere.h"
-#include "Kismet/GameplayStatics.h"
 #include "SSGrid.h"
-#include "../SSGameInstance.h"
-#include "../Auxiliary/BallType.h"
+#include "SSGameInstance.h"
+#include "SSGameStateBase.h"
+#include "SSGameLevelPlayerController.h"
+
+#include "Kismet/GameplayStatics.h"
 #include "Engine/AssetManager.h"
 #include "Components/SphereComponent.h"
 #include "DrawDebugHelpers.h"
-#include "../SSGameStateBase.h"
 #include "NativeGameplayTags.h"
 
 #include <unordered_set>
@@ -21,7 +24,7 @@ ASSGameLevelGameMode::ASSGameLevelGameMode()
     PrimaryActorTick.bStartWithTickEnabled = true;
     PrimaryActorTick.bCanEverTick = true;
     DefaultPawnClass = ASSPawn::StaticClass();
-    PlayerControllerClass = APlayerController::StaticClass();
+    PlayerControllerClass = ASSGameLevelPlayerController::StaticClass();
     GameStateClass = ASSGameStateBase::StaticClass();
 }
 

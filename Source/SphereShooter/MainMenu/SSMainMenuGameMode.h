@@ -4,11 +4,10 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameModeBase.h"
+
 #include "SSMainMenuGameMode.generated.h"
 
-/**
- * 
- */
+
 UCLASS()
 class SPHERESHOOTER_API ASSMainMenuGameMode : public AGameModeBase
 {

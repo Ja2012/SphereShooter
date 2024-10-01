@@ -1,7 +1,9 @@
 #pragma once
-#include "CoreMinimal.h"
+
 #include "SSColor.h"
 #include "SSSphere.h"
+
+#include "CoreMinimal.h"
 
 #include <unordered_set>
 

@@ -1,8 +1,9 @@
 // LICENSE.md
 
 #include "SSGrid.h"
+
+#include "Auxiliary/BallType.h"
 #include "SSGameLevelGameMode.h"
-#include "../Auxiliary/BallType.h"
 
 #include <unordered_map>
 

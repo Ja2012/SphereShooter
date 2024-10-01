@@ -2,9 +2,10 @@
 
 #pragma once
 
+#include "SSColor.h"
+
 #include "CoreMinimal.h"
 #include "Engine/DataAsset.h"
-#include "SSColor.h"
 
 #include "BallType.generated.h"
 

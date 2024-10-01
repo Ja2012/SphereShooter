@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
+
 #include "SSPawn.generated.h"
 
 struct FInputActionValue;

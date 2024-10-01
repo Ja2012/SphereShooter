@@ -3,8 +3,9 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameplayTagAssetInterface.h"
 #include "GameFramework/Actor.h"
+#include "GameplayTagAssetInterface.h"
+
 #include "SSTaggedActor.generated.h"
 
 UCLASS()

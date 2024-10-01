@@ -1,8 +1,9 @@
 #pragma once
 
+#include "Auxiliary/SSColor.h"
+
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "../Auxiliary/SSColor.h"
 
 #include "SSSphere.generated.h"
 

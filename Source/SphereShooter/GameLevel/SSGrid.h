@@ -2,10 +2,12 @@
 
 #pragma once
 
+#include "Auxiliary/SSTaggedActor.h"
+#include "Auxiliary/SSTile.h"
+#include "Auxiliary/Tags.h"
+
 #include "CoreMinimal.h"
-#include "../Auxiliary/SSTaggedActor.h"
-#include "../Auxiliary/SSTile.h"
-#include "../Auxiliary/Tags.h"
+
 #include "SSGrid.generated.h"
 
 
