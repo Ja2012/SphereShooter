@@ -3,6 +3,11 @@
 #include "UI/SSGameLevelHUD.h"
 #include "UI/SSGameLevelWidget.h"
 
+void ASSGameLevelHUD::ShowGameOverDialog()
+{
+    GameLevelWidget->ShowGameOverDialog();
+}
+
 // USSGameLevelWidget
 void ASSGameLevelHUD::BeginPlay()
 {

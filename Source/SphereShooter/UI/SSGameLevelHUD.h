@@ -7,13 +7,15 @@
 
 #include "SSGameLevelHUD.generated.h"
 
+class USSGameLevelWidget;
+
 UCLASS()
 class SPHERESHOOTER_API ASSGameLevelHUD : public AHUD
 {
     GENERATED_BODY()
 
 public:
-    UUserWidget* GetGameLevelWidget() const { return GameLevelWidget; }
+    void ShowGameOverDialog();
 
 protected:
     void BeginPlay() override;
@@ -21,5 +23,5 @@ protected:
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "q")
     TSubclassOf<UUserWidget> GameLevelWidgetClass;
 
-    TObjectPtr<UUserWidget> GameLevelWidget;
+    TObjectPtr<USSGameLevelWidget> GameLevelWidget;
 };

@@ -15,6 +15,7 @@ class ASSGrid;
 class UBallType;
 class ASSPawn;
 class ASSGameStateBase;
+class ASSGameLevelPlayerController;
 
 UCLASS()
 class SPHERESHOOTER_API ASSGameLevelGameMode : public AGameModeBase
@@ -84,7 +85,7 @@ protected:
     uint8 HandleStrikes(const std::unordered_set<FTile*>& SameColorTiles) const;
     
     UPROPERTY()
-    TObjectPtr<APlayerController> PlayerController;
+    TObjectPtr<ASSGameLevelPlayerController> PlayerController;
 
     UPROPERTY()
     TObjectPtr<ASSPawn> Pawn;

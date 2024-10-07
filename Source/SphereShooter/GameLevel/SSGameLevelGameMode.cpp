@@ -35,7 +35,7 @@ void ASSGameLevelGameMode::BeginPlay()
     Super::BeginPlay();
     SetKeyActors();
 
-    PlayerController = GetWorld()->GetFirstPlayerController<APlayerController>();
+    PlayerController = GetWorld()->GetFirstPlayerController<ASSGameLevelPlayerController>();
     Pawn = Cast<ASSPawn>(PlayerController->GetPawn());
     MyGameState = GetGameState<ASSGameStateBase>();
 
@@ -308,6 +308,8 @@ void ASSGameLevelGameMode::GameOver()
 {
     // TODO make game over
     UE_LOG(ASSGameLevelGameModeLog, Display, TEXT("Game Over"));
+    PlayerController->GetHUD<ASSGameLevelHUD>()->ShowGameOverDialog();
+    UGameplayStatics::SetGamePaused(GetWorld(), true);
 }
 
 void ASSGameLevelGameMode::SetBallCDO() const

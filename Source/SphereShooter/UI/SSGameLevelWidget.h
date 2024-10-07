@@ -14,12 +14,18 @@ class SPHERESHOOTER_API USSGameLevelWidget : public UUserWidget
 {
     GENERATED_BODY()
 
+public:
+    void ShowGameOverDialog();
+
 protected:
     UPROPERTY(meta = (BindWidget))
     TObjectPtr<UButton> ExitButton;
 
     UPROPERTY(meta = (BindWidget))
     TObjectPtr<USSConfirmWidget> ExitDialog;
+
+    UPROPERTY(meta = (BindWidget))
+    TObjectPtr<USSConfirmWidget> GameOverDialog;
 
     virtual void NativeOnInitialized() override;
 
