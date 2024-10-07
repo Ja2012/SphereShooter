@@ -36,7 +36,7 @@ void ASSPawn::BeginPlay()
 
     GameMode = Cast<ASSGameLevelGameMode>(GetWorld()->GetAuthGameMode());
 
-    AimBeamNiagaraComponent->SetWorldLocation(GameMode->GerRollBall()->GetActorLocation() + FVector(0, 0, 1.f));
+    AimBeamNiagaraComponent->SetWorldLocation(GameMode->GetRollBallSpawn()->GetActorLocation() + FVector(0, 0, 1.f));
     AimBeamNiagaraComponent->SetAsset(AimBeamNiagaraSystem);
     AimBeamNiagaraComponent->SetVariableVec3(AimBeamLengthVarName, AimBeamLengthVarValue);
 }
@@ -47,11 +47,7 @@ void ASSPawn::ShootRollBall(const FInputActionValue& Value)
     Roll(AimBeamNiagaraComponent->GetForwardVector() * ShootScaleImpulse);
 }
 
-void ASSPawn::MoveAimBeam(const FInputActionValue& Value)
-{
-    if (!AimBeamNiagaraComponent) return;
-    AimBeamNiagaraComponent->AddRelativeRotation(FRotator(0.f, Value.Get<float>(), 0.f));
-}
+
 
 void ASSPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
@@ -60,7 +56,6 @@ void ASSPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
     if (UEnhancedInputComponent* Input = Cast<UEnhancedInputComponent>(PlayerInputComponent))
     {
         Input->BindAction(ShootAction, ETriggerEvent::Triggered, this, &ASSPawn::ShootRollBall);
-        Input->BindAction(MouseMoveAction, ETriggerEvent::Triggered, this, &ASSPawn::MoveAimBeam);
     }
 }
 
@@ -86,4 +81,10 @@ void ASSPawn::Roll(const FVector& Impulse)
         CurrentRollBoll->Roll(Impulse);
         CurrentRollBoll = nullptr;
     }
+}
+
+void ASSPawn::SetAimBeamRotation(FRotator Rotator)
+{
+     if (!AimBeamNiagaraComponent) return;
+     AimBeamNiagaraComponent->SetWorldRotation(Rotator);
 }

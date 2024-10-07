@@ -27,12 +27,10 @@ public:
     void SetRollBall(ASSSphere* Ball) { CurrentRollBoll = Ball; }
     ASSSphere* GetRollBall() const { return CurrentRollBoll; }
     void Roll(const FVector& Impulse);    
+    void SetAimBeamRotation(FRotator Rotator);
 
 protected:
     virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-
-    UFUNCTION()
-    void MoveAimBeam(const FInputActionValue& Value);
 
     UFUNCTION()
     void ShootRollBall(const FInputActionValue& Value);

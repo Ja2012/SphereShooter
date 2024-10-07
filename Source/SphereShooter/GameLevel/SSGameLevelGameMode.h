@@ -28,7 +28,7 @@ public:
     TObjectPtr<UBallType> GetBallType() const { return BallType; }
     float GetGridMoveDistance() const { return GridMoveDistance; }
     uint8 GetNumOfGridRowsWithBalls() const { return NumOfGridRowsWithBalls; }
-    AActor* GerRollBall()
+    AActor* GetRollBallSpawn()
     {
         if (!RollBallSpawn) SetKeyActors();
         return RollBallSpawn;

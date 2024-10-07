@@ -7,6 +7,7 @@
 #include "SSGameInstance.h"
 #include "SSGameStateBase.h"
 #include "SSGameLevelPlayerController.h"
+#include "UI/SSGameLevelHUD.h"
 
 #include "Kismet/GameplayStatics.h"
 #include "Engine/AssetManager.h"
@@ -26,6 +27,7 @@ ASSGameLevelGameMode::ASSGameLevelGameMode()
     DefaultPawnClass = ASSPawn::StaticClass();
     PlayerControllerClass = ASSGameLevelPlayerController::StaticClass();
     GameStateClass = ASSGameStateBase::StaticClass();
+    HUDClass = ASSGameLevelHUD::StaticClass();
 }
 
 void ASSGameLevelGameMode::BeginPlay()

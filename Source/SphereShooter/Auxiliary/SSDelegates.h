@@ -4,7 +4,6 @@
 
 #include "SSLevelData.h"
 
-#include "CoreMinimal.h"
 
-
-DECLARE_MULTICAST_DELEGATE_OneParam(FOnLevelSelectedSignatur, FSSLevelData*)
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnLevelSelectedSignature, FSSLevelData*);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnConfirmClickedSignature, const bool);

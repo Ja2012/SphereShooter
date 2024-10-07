@@ -19,7 +19,7 @@ void ASSGrid::GenerateGrid()
 {
     ASSGameLevelGameMode* GameMode = Cast<ASSGameLevelGameMode>(GetWorld()->GetAuthGameMode());
     const float BallSize = GameMode->GetBallType()->MeshDiameter;
-    const FVector PlayerBallLocation = GameMode->GerRollBall()->GetActorLocation();
+    const FVector PlayerBallLocation = GameMode->GetRollBallSpawn()->GetActorLocation();
     const FVector GridStartLoc = GetActorLocation();
 
     const float TileWidth = BallSize;

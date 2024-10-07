@@ -19,7 +19,7 @@ class SPHERESHOOTER_API USSLevelItemWidget : public UUserWidget
 {
     GENERATED_BODY()
 public:
-    FOnLevelSelectedSignatur OnLevelSelected;
+    FOnLevelSelectedSignature OnLevelSelected;
     void SetLevelData(const FSSLevelData& Data);
     FSSLevelData GetLevelData() const { return LevelData; };
 

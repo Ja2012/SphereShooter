@@ -23,6 +23,8 @@ public:
     FSSLevelData* GetStartupLevel() const { return StartupLevel; };
     void SetStartupLevel(FSSLevelData* Data) { StartupLevel = Data; }
 
+    FName GetMainMenuLevelName() const { return MainMenuLevelName; }
+
 private:
     UPROPERTY(EditDefaultsOnly)
     TSoftObjectPtr<UBallType> CurrentBallType;
@@ -31,4 +33,7 @@ private:
     TArray<FSSLevelData> LevelsData;
 
     FSSLevelData* StartupLevel;
+
+    UPROPERTY(EditDefaultsOnly)
+    FName MainMenuLevelName = NAME_None;
 };
