@@ -16,6 +16,8 @@ class USsBallType;
 class ASsPawn;
 class ASsGameStateBase;
 class ASsGameLevelPlayerController;
+class ASsPlayerState;
+class USsGameInstance;
 
 UCLASS()
 class SPHERESHOOTER_API ASSGameLevelGameMode : public AGameModeBase
@@ -25,7 +27,7 @@ class SPHERESHOOTER_API ASSGameLevelGameMode : public AGameModeBase
 public:
     ASSGameLevelGameMode();
     virtual void Tick(float DeltaSeconds) override;
-    
+
     TObjectPtr<USsBallType> GetBallType() const { return BallType; }
     float GetGridMoveDistance() const { return GridMoveDistance; }
     uint8 GetNumOfGridRowsWithBalls() const { return NumOfGridRowsWithBalls; }
@@ -34,13 +36,13 @@ public:
         if (!RollBallSpawn) SetKeyActors();
         return RollBallSpawn;
     }
-    
+
 protected:
     virtual void BeginPlay() override;
-    
+
     UPROPERTY()
     TObjectPtr<ASsGrid> Grid;
-    
+
     UPROPERTY()
     TObjectPtr<AActor> RollBallSpawn;
 
@@ -57,7 +59,7 @@ protected:
     UPROPERTY(EditDefaultsOnly, Category = "qq")
     FName PlayerBallPositionMarkActorTag = "PlayerBallXYLocation";
     void SetKeyActors();
-    
+
     UPROPERTY(EditAnywhere, Category = "qq")
     uint8 NumOfGridRowsWithBalls = 10;
 
@@ -83,7 +85,7 @@ protected:
     void AddPoints(const uint8 StrikeCount, const uint8 DropCount) const;
     void HandleMisses() const;
     uint8 HandleStrikes(const std::unordered_set<FSsTile*>& SameColorTiles) const;
-    
+
     UPROPERTY()
     TObjectPtr<ASsGameLevelPlayerController> PlayerController;
 
@@ -92,4 +94,12 @@ protected:
 
     UPROPERTY()
     TObjectPtr<ASsGameStateBase> MyGameState;
+
+    UPROPERTY()
+    TObjectPtr<ASsPlayerState> PlayerState;
+
+    UPROPERTY()
+    TObjectPtr<USsGameInstance> GameInstance;
+
+    void ExitLevel();
 };

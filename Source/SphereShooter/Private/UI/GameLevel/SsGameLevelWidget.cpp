@@ -9,7 +9,7 @@
 #include "Components/Button.h"
 #include "Kismet/GameplayStatics.h"
 
-void USsGameLevelWidget::ShowGameOverDialog() 
+void USsGameLevelWidget::ShowGameOverDialog()
 {
     GameOverDialog->SetVisibility(ESlateVisibility::Visible);
 }
@@ -25,7 +25,7 @@ void USsGameLevelWidget::NativeOnInitialized()
     if (ExitDialog)
     {
         ExitDialog->OnConfirmVariantClicked.AddUObject(this, &USsGameLevelWidget::OnExitDialogResolve);
-    }   
+    }
     if (GameOverDialog)
     {
         GameOverDialog->OnConfirmVariantClicked.AddUObject(this, &USsGameLevelWidget::OnExitDialogResolve);
@@ -44,8 +44,7 @@ void USsGameLevelWidget::OnExitDialogResolve(const bool bIsOkayPressed)
 {
     if (bIsOkayPressed)
     {
-
-        UGameplayStatics::OpenLevel(this, GetWorld()->GetGameInstance<USsGameInstance>()->GetMainMenuLevelName());
+        OnExitClicked.Broadcast();
     }
     else
     {
@@ -55,7 +54,6 @@ void USsGameLevelWidget::OnExitDialogResolve(const bool bIsOkayPressed)
             SSPlayerController->SetInputMode(FInputModeGameAndUI());
             ExitDialog->SetVisibility(ESlateVisibility::Hidden);
             UGameplayStatics::SetGamePaused(GetWorld(), false);
-
         }
     }
 }

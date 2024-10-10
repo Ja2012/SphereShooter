@@ -8,6 +8,9 @@
 #include "SphereShooter/Public/SsGameStateBase.h"
 #include "SphereShooter/Public/Player/SsGameLevelPlayerController.h"
 #include "SphereShooter/Public/UI/GameLevel/SsGameLevelHUD.h"
+#include "SphereShooter/Public/Player/SsPlayerState.h"
+#include "SphereShooter/Public/CoreTypes/SsSaveGame.h"
+#include "SphereShooter/Public/UI/GameLevel/SsGameLevelWidget.h"
 
 #include "Kismet/GameplayStatics.h"
 #include "Engine/AssetManager.h"
@@ -28,16 +31,20 @@ ASSGameLevelGameMode::ASSGameLevelGameMode()
     PlayerControllerClass = ASsGameLevelPlayerController::StaticClass();
     GameStateClass = ASsGameStateBase::StaticClass();
     HUDClass = ASsGameLevelHUD::StaticClass();
+    PlayerStateClass = ASsPlayerState::StaticClass();
 }
 
 void ASSGameLevelGameMode::BeginPlay()
 {
     Super::BeginPlay();
+
     SetKeyActors();
 
-    PlayerController = GetWorld()->GetFirstPlayerController<ASsGameLevelPlayerController>();
-    Pawn = Cast<ASsPawn>(PlayerController->GetPawn());
+    GameInstance = GetGameInstance<USsGameInstance>();
     MyGameState = GetGameState<ASsGameStateBase>();
+    PlayerController = GetWorld()->GetFirstPlayerController<ASsGameLevelPlayerController>();
+    PlayerState = PlayerController->GetPlayerState<ASsPlayerState>();
+    Pawn = Cast<ASsPawn>(PlayerController->GetPawn());
 
     LoadBallTypeDataAsset();
 }
@@ -47,6 +54,9 @@ void ASSGameLevelGameMode::Init()
     SetBallCDO();
     SetRollBall();
     InitGrid();
+
+    PlayerState->UpdateFromPlayerData(GameInstance->GetSaveGameInstance()->GetLastPlayerData());
+    PlayerController->GetHUD<ASsGameLevelHUD>()->GetWidget()->OnExitClicked.AddUObject(this, &ASSGameLevelGameMode::ExitLevel);
 }
 
 void ASSGameLevelGameMode::SetKeyActors()
@@ -69,14 +79,17 @@ void ASSGameLevelGameMode::Tick(float DeltaSeconds)
 
     const FString DebugMessage{
         //
-        "Points: " + FString::FromInt(MyGameState->PlayerPoints) + "\n" + //
-        "Misses: " + FString::FromInt(MyGameState->MissesCount)};
-    GEngine->AddOnScreenDebugMessage(0, 0.f, FColor::Red, DebugMessage, false, FVector2d(2.f, 2.f));
+        "Points: " + FString::FromInt(PlayerState->GetScore()) + "\n" +  //
+        "Misses: " + FString::FromInt(PlayerState->GetMissesCount()) + "\n" //
+        "Max: " + FString::FromInt(PlayerState->GetMaxScore()) + "\n" //
+        "DateOfMax " + PlayerState->GetWhenMaxScore().ToFormattedString(TEXT("%d-%b-Y : %H:%M ")) //
+    };
+    GEngine->AddOnScreenDebugMessage(0, 0.f, FColor::Emerald, DebugMessage, false, FVector2d(2.f, 2.f));
 }
 
 void ASSGameLevelGameMode::LoadBallTypeDataAsset()
 {
-    BallTypeSoftPtr = Cast<USsGameInstance>(GetGameInstance())->GetCurrentBallType();
+    BallTypeSoftPtr = GameInstance->GetCurrentBallType();
     FStreamableManager& StreamableManager = UAssetManager::GetStreamableManager();
     StreamableManager.RequestAsyncLoad(
         BallTypeSoftPtr.ToSoftObjectPath(), FStreamableDelegate::CreateUObject(this, &ASSGameLevelGameMode::OnLoadBallTypeDataAsset));
@@ -219,31 +232,34 @@ void ASSGameLevelGameMode::OnRollBallHit(UPrimitiveComponent* HitComponent, AAct
 
 void ASSGameLevelGameMode::AddPoints(const uint8 StrikeCount, const uint8 DropCount) const
 {
-    SIZE_T PointsOld = MyGameState->PlayerPoints;
+    const uint64 PointsOld = PlayerState->GetScore();
     // TODO here come code to count win points for strikes / VFX?
     if (StrikeCount > 2)
     {
-        MyGameState->PlayerPoints += StrikeCount;
-        UE_LOG(LogTemp, Display, TEXT("Strike %d balls | Points: %llu -> %llu"), StrikeCount, PointsOld, MyGameState->PlayerPoints);
+        PlayerState->SetScore(PointsOld + StrikeCount);
+        UE_LOG(LogTemp, Display, TEXT("Strike %d balls | Points: %d -> %d"), StrikeCount, PointsOld, PlayerState->GetScore());
     }
 
     // TODO here come code to count win points for drop balls / VFX?
     if (DropCount)
     {
-        MyGameState->PlayerPoints += DropCount;
-        UE_LOG(LogTemp, Display, TEXT("Drop %d balls | Points: %llu -> %llu"), DropCount, PointsOld, MyGameState->PlayerPoints);
+        PlayerState->SetScore(PointsOld + DropCount);
+        UE_LOG(LogTemp, Display, TEXT("Drop %d balls | Points: %d -> %d"), DropCount, PointsOld, PlayerState->GetScore());
     }
+
+    PlayerState->UpdateMaxScore(PlayerState->GetScore());
 }
 
 void ASSGameLevelGameMode::HandleMisses() const
 {    
-    ++(MyGameState->MissesCount);
-    UE_LOG(LogTemp, Display, TEXT("Miss %d -> %d our of %d"), MyGameState->MissesCount -1, MyGameState->MissesCount, MissesLimitNum);
+    PlayerState->AddMissesCount();
+    UE_LOG(LogTemp, Display, TEXT("Miss %d -> %d out of %d"), //
+        PlayerState->GetMissesCount() - 1, PlayerState->GetMissesCount(), MissesLimitNum);
 
-    if (MyGameState->MissesCount >= MissesLimitNum)
+    if (PlayerState->GetMissesCount() >= MissesLimitNum)
     {
         Grid->MoveDown();
-        MyGameState->MissesCount = 0;
+        PlayerState->ResetMissesCount();
     }   
 }
 
@@ -295,6 +311,13 @@ uint8 ASSGameLevelGameMode::HandleStrikes(const std::unordered_set<FSsTile*>& Sa
         }
     }
     return DropCount;
+}
+
+void ASSGameLevelGameMode::ExitLevel() 
+{
+    GameInstance->GetSaveGameInstance()->GetLastPlayerData()->UpdateFromPlayerState(PlayerState);
+    GameInstance->SaveGame(GameInstance->GetSaveGameInstance());
+    UGameplayStatics::OpenLevel(this, GameInstance->GetMainMenuLevelName());
 }
 
 bool ASSGameLevelGameMode::IsBallsCrossedLine() const

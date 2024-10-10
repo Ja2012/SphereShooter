@@ -2,6 +2,8 @@
 
 #pragma once
 
+#include "SphereShooter/Public/CoreTypes/SsDelegates.h"
+
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
 
@@ -17,6 +19,8 @@ class SPHERESHOOTER_API USsGameLevelWidget : public UUserWidget
 
 public:
     void ShowGameOverDialog();
+
+    FOnExitLevelClickedSignature OnExitClicked;
 
 protected:
     UPROPERTY(meta = (BindWidget))

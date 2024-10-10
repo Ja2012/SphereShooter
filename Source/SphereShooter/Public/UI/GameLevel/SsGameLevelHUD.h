@@ -16,6 +16,7 @@ class SPHERESHOOTER_API ASsGameLevelHUD : public AHUD
 
 public:
     void ShowGameOverDialog();
+    TObjectPtr<USsGameLevelWidget> GetWidget() const { return GameLevelWidget; }
 
 protected:
     void BeginPlay() override;
