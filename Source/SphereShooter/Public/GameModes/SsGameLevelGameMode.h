@@ -7,18 +7,19 @@
 
 #include "SsGameLevelGameMode.generated.h"
 
-class ASsTaggedActor;
+class ASsGameLevelHUD;
+class ASsGameLevelPlayerController;
+class ASsGameStateBase;
+class ASsGrid;
+class ASsPawn;
+class ASsPlayerState;
 class ASsSphere;
+class ASsTaggedActor;
+class USsBallType;
+class USsGameInstance;
 struct FGameplayTag;
 struct FSsTile;
-class ASsGrid;
-class USsBallType;
-class ASsPawn;
-class ASsGameStateBase;
-class ASsGameLevelPlayerController;
-class ASsPlayerState;
-class USsGameInstance;
-
+    
 UCLASS()
 class SPHERESHOOTER_API ASSGameLevelGameMode : public AGameModeBase
 {
@@ -26,7 +27,6 @@ class SPHERESHOOTER_API ASSGameLevelGameMode : public AGameModeBase
 
 public:
     ASSGameLevelGameMode();
-    virtual void Tick(float DeltaSeconds) override;
 
     TObjectPtr<USsBallType> GetBallType() const { return BallType; }
     float GetGridMoveDistance() const { return GridMoveDistance; }
@@ -100,6 +100,9 @@ protected:
 
     UPROPERTY()
     TObjectPtr<USsGameInstance> GameInstance;
+
+    UPROPERTY()
+    TObjectPtr<ASsGameLevelHUD> HUD;
 
     void ExitLevel();
 };

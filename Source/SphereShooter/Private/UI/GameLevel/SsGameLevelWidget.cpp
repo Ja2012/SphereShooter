@@ -9,11 +9,6 @@
 #include "Components/Button.h"
 #include "Kismet/GameplayStatics.h"
 
-void USsGameLevelWidget::ShowGameOverDialog()
-{
-    GameOverDialog->SetVisibility(ESlateVisibility::Visible);
-}
-
 void USsGameLevelWidget::NativeOnInitialized()
 {
     Super::NativeOnInitialized();

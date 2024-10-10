@@ -11,6 +11,7 @@
 
 class UButton;
 class USsConfirmWidget;
+class USsMatchInfoWidget;
 
 UCLASS()
 class SPHERESHOOTER_API USsGameLevelWidget : public UUserWidget
@@ -22,6 +23,9 @@ public:
 
     FOnExitLevelClickedSignature OnExitClicked;
 
+    TObjectPtr<USsConfirmWidget> GetGameOverDialog() const { return GameOverDialog; }
+    TObjectPtr<USsMatchInfoWidget> GetMatchInfoWidget() const { return MatchInfoWidget; }
+
 protected:
     UPROPERTY(meta = (BindWidget))
     TObjectPtr<UButton> ExitButton;
@@ -31,6 +35,9 @@ protected:
 
     UPROPERTY(meta = (BindWidget))
     TObjectPtr<USsConfirmWidget> GameOverDialog;
+
+    UPROPERTY(meta = (BindWidget))
+    TObjectPtr<USsMatchInfoWidget> MatchInfoWidget;
 
     virtual void NativeOnInitialized() override;
 

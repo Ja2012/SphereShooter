@@ -11,6 +11,7 @@
 #include "Player/SsPlayerState.h"
 #include "CoreTypes/SsSaveGame.h"
 #include "UI/GameLevel/SsGameLevelWidget.h"
+#include "UI/GameLevel/SsMatchInfoWidget.h"
 
 #include "Kismet/GameplayStatics.h"
 #include "Engine/AssetManager.h"
@@ -25,8 +26,6 @@ DEFINE_LOG_CATEGORY_STATIC(ASSGameLevelGameModeLog, All, All);
 
 ASSGameLevelGameMode::ASSGameLevelGameMode()
 {
-    PrimaryActorTick.bStartWithTickEnabled = true;
-    PrimaryActorTick.bCanEverTick = true;
     DefaultPawnClass = ASsPawn::StaticClass();
     PlayerControllerClass = ASsGameLevelPlayerController::StaticClass();
     GameStateClass = ASsGameStateBase::StaticClass();
@@ -45,6 +44,7 @@ void ASSGameLevelGameMode::BeginPlay()
     PlayerController = GetWorld()->GetFirstPlayerController<ASsGameLevelPlayerController>();
     PlayerState = PlayerController->GetPlayerState<ASsPlayerState>();
     Pawn = Cast<ASsPawn>(PlayerController->GetPawn());
+    HUD = PlayerController->GetHUD<ASsGameLevelHUD>();
 
     LoadBallTypeDataAsset();
 }
@@ -56,7 +56,8 @@ void ASSGameLevelGameMode::Init()
     InitGrid();
 
     PlayerState->UpdateFromPlayerData(GameInstance->GetSaveGameInstance()->GetLastPlayerData());
-    PlayerController->GetHUD<ASsGameLevelHUD>()->GetWidget()->OnExitClicked.AddUObject(this, &ASSGameLevelGameMode::ExitLevel);
+    HUD->GetWidget()->OnExitClicked.AddUObject(this, &ASSGameLevelGameMode::ExitLevel);
+    HUD->UpdateMatchInfo(PlayerState);
 }
 
 void ASSGameLevelGameMode::SetKeyActors()
@@ -71,20 +72,6 @@ void ASSGameLevelGameMode::SetKeyActors()
         else if (Interface->HasMatchingGameplayTag(Tag_RollBallSpawn)) RollBallSpawn = Actor;
         else if (Interface->HasMatchingGameplayTag(Tag_CrossLine)) CrossLine = Actor;
     }
-}
-
-void ASSGameLevelGameMode::Tick(float DeltaSeconds)
-{
-    Super::Tick(DeltaSeconds);
-
-    const FString DebugMessage{
-        //
-        "Points: " + FString::FromInt(PlayerState->GetScore()) + "\n" +  //
-        "Misses: " + FString::FromInt(PlayerState->GetMissesCount()) + "\n" //
-        "Max: " + FString::FromInt(PlayerState->GetMaxScore()) + "\n" //
-        "DateOfMax " + PlayerState->GetWhenMaxScore().ToFormattedString(TEXT("%d-%b-Y : %H:%M ")) //
-    };
-    GEngine->AddOnScreenDebugMessage(0, 0.f, FColor::Emerald, DebugMessage, false, FVector2d(2.f, 2.f));
 }
 
 void ASSGameLevelGameMode::LoadBallTypeDataAsset()
@@ -227,6 +214,7 @@ void ASSGameLevelGameMode::OnRollBallHit(UPrimitiveComponent* HitComponent, AAct
         return;
     }
     
+    HUD->UpdateMatchInfo(PlayerState);
     SetRollBall();
 }
 
