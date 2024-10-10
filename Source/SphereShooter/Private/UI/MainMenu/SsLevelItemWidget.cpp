@@ -1,6 +1,6 @@
 // LICENSE.md
 
-#include "SphereShooter/Public/UI/MainMenu/SsLevelItemWidget.h"
+#include "UI/MainMenu/SsLevelItemWidget.h"
 
 #include "Components/Button.h"
 #include "Components/TextBlock.h"

@@ -1,9 +1,9 @@
 // LICENSE.md
 
-#include "SphereShooter/Public/SsGrid.h"
+#include "SsGrid.h"
 
-#include "SphereShooter/Public/CoreTypes/SsBallType.h"
-#include "SphereShooter/Public/GameModes/SsGameLevelGameMode.h"
+#include "CoreTypes/SsBallType.h"
+#include "GameModes/SsGameLevelGameMode.h"
 
 #include <unordered_map>
 

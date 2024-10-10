@@ -1,9 +1,9 @@
 // LICENSE.md
 
-#include "SphereShooter/Public/GameModes/SsMainMenuGameMode.h"
+#include "GameModes/SsMainMenuGameMode.h"
 
-#include "SphereShooter/Public/UI/MainMenu/SsMainMenuHUD.h"
-#include "SphereShooter/Public/Player/SsMainMenuPlayerController.h"
+#include "UI/MainMenu/SsMainMenuHUD.h"
+#include "Player/SsMainMenuPlayerController.h"
 
 ASSMainMenuGameMode::ASSMainMenuGameMode()
 {

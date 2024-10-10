@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "SphereShooter/Public/CoreTypes/SsDelegates.h"
+#include "CoreTypes/SsDelegates.h"
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"

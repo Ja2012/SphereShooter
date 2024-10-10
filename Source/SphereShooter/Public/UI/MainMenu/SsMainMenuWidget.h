@@ -2,9 +2,9 @@
 
 #pragma once
 
-#include "SphereShooter/Public/UI/MainMenu/SsLevelItemWidget.h"
-#include "SphereShooter/Public/CoreTypes/SsLevelData.h"
-#include "SphereShooter/Public/SsGameInstance.h"
+#include "UI/MainMenu/SsLevelItemWidget.h"
+#include "CoreTypes/SsLevelData.h"
+#include "SsGameInstance.h"
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"

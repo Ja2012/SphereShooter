@@ -1,7 +1,7 @@
 #pragma once
 
-#include "SphereShooter/Public/CoreTypes/SsColor.h"
-#include "SphereShooter/Public/SsSphere.h"
+#include "CoreTypes/SsColor.h"
+#include "SsSphere.h"
 
 #include "CoreMinimal.h"
 

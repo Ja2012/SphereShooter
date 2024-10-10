@@ -1,6 +1,6 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
-#include "SphereShooter/Public/SphereShooter.h"
+#include "SphereShooter.h"
 
 #include "Modules/ModuleManager.h"
 

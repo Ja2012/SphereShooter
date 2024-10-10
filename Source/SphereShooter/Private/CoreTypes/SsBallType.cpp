@@ -1,3 +1,3 @@
 // LICENSE.md
 
-#include "SphereShooter/Public/CoreTypes/SsBallType.h"
+#include "CoreTypes/SsBallType.h"

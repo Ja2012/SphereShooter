@@ -1,7 +1,7 @@
 #pragma once
 
-#include "SphereShooter/Public/CoreTypes/SsBallType.h"
-#include "SphereShooter/Public/CoreTypes/SsLevelData.h"
+#include "CoreTypes/SsBallType.h"
+#include "CoreTypes/SsLevelData.h"
 
 #include "CoreMinimal.h"
 #include "Engine/GameInstance.h"

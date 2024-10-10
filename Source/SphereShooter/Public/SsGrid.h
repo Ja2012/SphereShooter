@@ -2,9 +2,9 @@
 
 #pragma once
 
-#include "SphereShooter/Public/CoreTypes/SsTaggedActor.h"
-#include "SphereShooter/Public/CoreTypes/SsTile.h"
-#include "SphereShooter/Public/CoreTypes/SsTags.h"
+#include "CoreTypes/SsTaggedActor.h"
+#include "CoreTypes/SsTile.h"
+#include "CoreTypes/SsTags.h"
 
 #include "CoreMinimal.h"
 

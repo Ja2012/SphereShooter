@@ -1,10 +1,10 @@
 // LICENSE.md
 
-#include "SphereShooter/Public/UI/GameLevel/SsGameLevelWidget.h"
+#include "UI/GameLevel/SsGameLevelWidget.h"
 
-#include "SphereShooter/Public/UI/SsConfirmWidget.h"
-#include "SphereShooter/Public/Player/SsGameLevelPlayerController.h"
-#include "SphereShooter/Public/SsGameInstance.h"
+#include "UI/SsConfirmWidget.h"
+#include "Player/SsGameLevelPlayerController.h"
+#include "SsGameInstance.h"
 
 #include "Components/Button.h"
 #include "Kismet/GameplayStatics.h"

@@ -1,7 +1,7 @@
 // LICENSE.md
 
-#include "SphereShooter/Public/UI/GameLevel/SsGameLevelHUD.h"
-#include "SphereShooter/Public/UI/GameLevel/SsGameLevelWidget.h"
+#include "UI/GameLevel/SsGameLevelHUD.h"
+#include "UI/GameLevel/SsGameLevelWidget.h"
 
 void ASsGameLevelHUD::ShowGameOverDialog()
 {

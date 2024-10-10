@@ -1,8 +1,9 @@
 // LICENSE.md
 
-#include "SphereShooter/Public/Player/SsPlayerState.h"
-
 #include "CoreTypes/SsSaveGame.h"
+
+#include "Player/SsPlayerState.h"
+
 
 void FSsPlayerData::UpdateFromPlayerState(const ASsPlayerState* PlayerState)
 {

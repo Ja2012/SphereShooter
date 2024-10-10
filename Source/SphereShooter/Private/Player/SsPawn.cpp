@@ -1,7 +1,7 @@
-#include "SphereShooter/Public/Player/SsPawn.h"
+#include "Player/SsPawn.h"
 
-#include "SphereShooter/Public/SsSphere.h"
-#include "SphereShooter/Public/GameModes/SsGameLevelGameMode.h"
+#include "SsSphere.h"
+#include "GameModes/SsGameLevelGameMode.h"
 
 #include "Engine/LocalPlayer.h"
 #include "EnhancedInputComponent.h"

@@ -1,9 +1,9 @@
 // LICENSE.md
 
-#include "SphereShooter/Public/Player/SsGameLevelPlayerController.h"
-#include "SphereShooter/Public/UI/GameLevel/SsGameLevelHUD.h"
-#include "SphereShooter/Public/Player/SsPawn.h"
-#include "SphereShooter/Public/GameModes/SsGameLevelGameMode.h"
+#include "Player/SsGameLevelPlayerController.h"
+#include "UI/GameLevel/SsGameLevelHUD.h"
+#include "Player/SsPawn.h"
+#include "GameModes/SsGameLevelGameMode.h"
 
 #include "Blueprint/UserWidget.h"
 

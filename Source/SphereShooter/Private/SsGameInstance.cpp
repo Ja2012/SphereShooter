@@ -1,5 +1,5 @@
-#include "SphereShooter/Public/SsGameInstance.h"
-#include "SphereShooter/Public/CoreTypes/SsSaveGame.h"
+#include "SsGameInstance.h"
+#include "CoreTypes/SsSaveGame.h"
 
 #include "Kismet/GameplayStatics.h"
 

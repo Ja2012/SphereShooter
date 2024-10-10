@@ -2,8 +2,8 @@
 
 #pragma once
 
-#include "SphereShooter/Public/CoreTypes/SsDelegates.h"
-#include "SphereShooter/Public/CoreTypes/SsLevelData.h"
+#include "CoreTypes/SsDelegates.h"
+#include "CoreTypes/SsLevelData.h"
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"

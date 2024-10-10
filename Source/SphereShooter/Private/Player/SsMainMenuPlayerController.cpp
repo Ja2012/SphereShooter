@@ -1,7 +1,7 @@
 // LICENSE.md
 
 
-#include "SphereShooter/Public/Player/SsMainMenuPlayerController.h"
+#include "Player/SsMainMenuPlayerController.h"
 
 void ASsMainMenuPlayerController::BeginPlay() 
 {

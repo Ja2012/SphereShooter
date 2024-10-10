@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "SphereShooter/Public/CoreTypes/SsLevelData.h"
+#include "CoreTypes/SsLevelData.h"
 
 
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnLevelSelectedSignature, FSsLevelData*);

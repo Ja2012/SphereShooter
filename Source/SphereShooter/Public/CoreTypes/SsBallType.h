@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "SphereShooter/Public/CoreTypes/SsColor.h"
+#include "CoreTypes/SsColor.h"
 
 #include "CoreMinimal.h"
 #include "Engine/DataAsset.h"

@@ -1,4 +1,4 @@
-#include "SphereShooter/Public/SsSphere.h"
+#include "SsSphere.h"
 
 #include "Components/SphereComponent.h"
 

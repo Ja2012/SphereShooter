@@ -1,6 +1,6 @@
 // LICENSE.md
 
-#include "SphereShooter/Public/UI/SsConfirmWidget.h"
+#include "UI/SsConfirmWidget.h"
 
 #include "Components/Button.h"
 

@@ -1,7 +1,7 @@
 ﻿// LICENSE.md
 
 
-#include "SphereShooter/Public/CoreTypes/SsTaggedActor.h"
+#include "CoreTypes/SsTaggedActor.h"
 
 void ASsTaggedActor::GetOwnedGameplayTags(FGameplayTagContainer& TagContainer) const
 {
