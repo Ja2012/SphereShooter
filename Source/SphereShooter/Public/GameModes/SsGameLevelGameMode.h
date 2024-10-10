@@ -21,12 +21,12 @@ struct FGameplayTag;
 struct FSsTile;
     
 UCLASS()
-class SPHERESHOOTER_API ASSGameLevelGameMode : public AGameModeBase
+class SPHERESHOOTER_API ASsGameLevelGameMode : public AGameModeBase
 {
     GENERATED_BODY()
 
 public:
-    ASSGameLevelGameMode();
+    ASsGameLevelGameMode();
 
     TObjectPtr<USsBallType> GetBallType() const { return BallType; }
     float GetGridMoveDistance() const { return GridMoveDistance; }

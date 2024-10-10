@@ -17,7 +17,7 @@ ASsGrid::ASsGrid()
 
 void ASsGrid::GenerateGrid()
 {
-    ASSGameLevelGameMode* GameMode = Cast<ASSGameLevelGameMode>(GetWorld()->GetAuthGameMode());
+    ASsGameLevelGameMode* GameMode = Cast<ASsGameLevelGameMode>(GetWorld()->GetAuthGameMode());
     const float BallSize = GameMode->GetBallType()->MeshDiameter;
     const FVector PlayerBallLocation = GameMode->GetRollBallSpawn()->GetActorLocation();
     const FVector GridStartLoc = GetActorLocation();
@@ -151,7 +151,7 @@ bool ASsGrid::IsTileWithBallConnectedToTop(const FSsTile* TargetTile)
 
 void ASsGrid::MoveDown()
 {
-    const ASSGameLevelGameMode* GameMode = Cast<ASSGameLevelGameMode>(GetWorld()->GetAuthGameMode());
+    const ASsGameLevelGameMode* GameMode = Cast<ASsGameLevelGameMode>(GetWorld()->GetAuthGameMode());
     const TObjectPtr<USsBallType> BallType = GameMode->GetBallType();
     
     // todo debug
@@ -222,7 +222,7 @@ void ASsGrid::GetTilesWithBallsNotConnectedToTop(FSsTile* TargetTile, std::unord
 
 void ASsGrid::SpawnBalls()
 {
-    const ASSGameLevelGameMode* GameMode = Cast<ASSGameLevelGameMode>(GetWorld()->GetAuthGameMode());
+    const ASsGameLevelGameMode* GameMode = Cast<ASsGameLevelGameMode>(GetWorld()->GetAuthGameMode());
     const TObjectPtr<USsBallType> BallType = GameMode->GetBallType();
     
     const uint8 NumOfGridRowsWithBalls = GameMode->GetNumOfGridRowsWithBalls();

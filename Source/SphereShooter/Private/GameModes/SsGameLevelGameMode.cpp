@@ -24,7 +24,7 @@
 
 DEFINE_LOG_CATEGORY_STATIC(ASSGameLevelGameModeLog, All, All);
 
-ASSGameLevelGameMode::ASSGameLevelGameMode()
+ASsGameLevelGameMode::ASsGameLevelGameMode()
 {
     DefaultPawnClass = ASsPawn::StaticClass();
     PlayerControllerClass = ASsGameLevelPlayerController::StaticClass();
@@ -33,7 +33,7 @@ ASSGameLevelGameMode::ASSGameLevelGameMode()
     PlayerStateClass = ASsPlayerState::StaticClass();
 }
 
-void ASSGameLevelGameMode::BeginPlay()
+void ASsGameLevelGameMode::BeginPlay()
 {
     Super::BeginPlay();
 
@@ -49,18 +49,18 @@ void ASSGameLevelGameMode::BeginPlay()
     LoadBallTypeDataAsset();
 }
 
-void ASSGameLevelGameMode::Init()
+void ASsGameLevelGameMode::Init()
 {
     SetBallCDO();
     SetRollBall();
     InitGrid();
 
     PlayerState->UpdateFromPlayerData(GameInstance->GetSaveGameInstance()->GetLastPlayerData());
-    HUD->GetWidget()->OnExitClicked.AddUObject(this, &ASSGameLevelGameMode::ExitLevel);
+    HUD->GetWidget()->OnExitClicked.AddUObject(this, &ASsGameLevelGameMode::ExitLevel);
     HUD->UpdateMatchInfo(PlayerState);
 }
 
-void ASSGameLevelGameMode::SetKeyActors()
+void ASsGameLevelGameMode::SetKeyActors()
 {
     TArray<AActor*> TaggedActors;
     UGameplayStatics::GetAllActorsOfClass(GetWorld(), ASsTaggedActor::StaticClass(), TaggedActors);
@@ -74,22 +74,22 @@ void ASSGameLevelGameMode::SetKeyActors()
     }
 }
 
-void ASSGameLevelGameMode::LoadBallTypeDataAsset()
+void ASsGameLevelGameMode::LoadBallTypeDataAsset()
 {
     BallTypeSoftPtr = GameInstance->GetCurrentBallType();
     FStreamableManager& StreamableManager = UAssetManager::GetStreamableManager();
     StreamableManager.RequestAsyncLoad(
-        BallTypeSoftPtr.ToSoftObjectPath(), FStreamableDelegate::CreateUObject(this, &ASSGameLevelGameMode::OnLoadBallTypeDataAsset));
+        BallTypeSoftPtr.ToSoftObjectPath(), FStreamableDelegate::CreateUObject(this, &ASsGameLevelGameMode::OnLoadBallTypeDataAsset));
 }
 
-void ASSGameLevelGameMode::OnLoadBallTypeDataAsset()
+void ASsGameLevelGameMode::OnLoadBallTypeDataAsset()
 {
     BallType = BallTypeSoftPtr.Get();
     check(BallType);
     Init();
 }
 
-void ASSGameLevelGameMode::SetRollBall(ESsColor Color) const
+void ASsGameLevelGameMode::SetRollBall(ESsColor Color) const
 {
     const FVector PlayerBallLocation = RollBallSpawn->GetActorLocation();
     // spawn
@@ -114,10 +114,10 @@ void ASSGameLevelGameMode::SetRollBall(ESsColor Color) const
     // finish
     RollBall->FinishSpawning(SpawnTransform);
     if (Pawn) Pawn->SetRollBall(RollBall);
-    RollBall->SphereCollisionComponent->OnComponentHit.AddDynamic(this, &ASSGameLevelGameMode::OnRollBallHit);
+    RollBall->SphereCollisionComponent->OnComponentHit.AddDynamic(this, &ASsGameLevelGameMode::OnRollBallHit);
 }
 
-void ASSGameLevelGameMode::InitGrid()
+void ASsGameLevelGameMode::InitGrid()
 {
     Grid = Cast<ASsGrid>(UGameplayStatics::GetActorOfClass(this, ASsGrid::StaticClass()));
     checkf(Grid, TEXT("No ASSGrid actor on scene"));
@@ -126,7 +126,7 @@ void ASSGameLevelGameMode::InitGrid()
 }
 
 
-void ASSGameLevelGameMode::OnRollBallHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp,
+void ASsGameLevelGameMode::OnRollBallHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp,
     FVector NormalImpulse, const FHitResult& Hit)
 {
     if (IsValid(OtherActor) && !OtherActor->IsA(ASsSphere::StaticClass())) return;
@@ -218,7 +218,7 @@ void ASSGameLevelGameMode::OnRollBallHit(UPrimitiveComponent* HitComponent, AAct
     SetRollBall();
 }
 
-void ASSGameLevelGameMode::AddPoints(const uint8 StrikeCount, const uint8 DropCount) const
+void ASsGameLevelGameMode::AddPoints(const uint8 StrikeCount, const uint8 DropCount) const
 {
     const uint64 PointsOld = PlayerState->GetScore();
     // TODO here come code to count win points for strikes / VFX?
@@ -238,7 +238,7 @@ void ASSGameLevelGameMode::AddPoints(const uint8 StrikeCount, const uint8 DropCo
     PlayerState->UpdateMaxScore(PlayerState->GetScore());
 }
 
-void ASSGameLevelGameMode::HandleMisses() const
+void ASsGameLevelGameMode::HandleMisses() const
 {    
     PlayerState->AddMissesCount();
     UE_LOG(LogTemp, Display, TEXT("Miss %d -> %d out of %d"), //
@@ -251,7 +251,7 @@ void ASSGameLevelGameMode::HandleMisses() const
     }   
 }
 
-uint8 ASSGameLevelGameMode::HandleStrikes(const std::unordered_set<FSsTile*>& SameColorTiles) const
+uint8 ASsGameLevelGameMode::HandleStrikes(const std::unordered_set<FSsTile*>& SameColorTiles) const
 {
     uint8 DropCount = 0;
     
@@ -301,21 +301,21 @@ uint8 ASSGameLevelGameMode::HandleStrikes(const std::unordered_set<FSsTile*>& Sa
     return DropCount;
 }
 
-void ASSGameLevelGameMode::ExitLevel() 
+void ASsGameLevelGameMode::ExitLevel() 
 {
     GameInstance->GetSaveGameInstance()->GetLastPlayerData()->UpdateFromPlayerState(PlayerState);
     GameInstance->SaveGame(GameInstance->GetSaveGameInstance());
     UGameplayStatics::OpenLevel(this, GameInstance->GetMainMenuLevelName());
 }
 
-bool ASSGameLevelGameMode::IsBallsCrossedLine() const
+bool ASsGameLevelGameMode::IsBallsCrossedLine() const
 {
     const FSsTile* Tile = Grid->GetLowestTileWithBall();
     UE_LOG(LogTemp, Display, TEXT("Lowest ball is: %s, row %d, column %d"), *UEnum::GetValueAsString(Tile->Color), Tile->Row, Tile->Column);
     return Tile->Location.X - (BallType->MeshDiameter / 2.f) <= CrossLine->GetActorLocation().X;
 }
 
-void ASSGameLevelGameMode::GameOver()
+void ASsGameLevelGameMode::GameOver()
 {
     // TODO make game over
     UE_LOG(ASSGameLevelGameModeLog, Display, TEXT("Game Over"));
@@ -323,7 +323,7 @@ void ASSGameLevelGameMode::GameOver()
     UGameplayStatics::SetGamePaused(GetWorld(), true);
 }
 
-void ASSGameLevelGameMode::SetBallCDO() const
+void ASsGameLevelGameMode::SetBallCDO() const
 {
     const ASsSphere* BallCDO = Cast<ASsSphere>(BallType->SphereClass->GetDefaultObject());
 

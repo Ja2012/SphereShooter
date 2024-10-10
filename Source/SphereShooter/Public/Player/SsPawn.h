@@ -7,7 +7,7 @@
 
 struct FInputActionValue;
 class ASsSphere;
-class ASSGameLevelGameMode;
+class ASsGameLevelGameMode;
 class UInputMappingContext;
 class UInputAction;
 class UNiagaraSystem;
@@ -36,7 +36,7 @@ protected:
     void ShootRollBall(const FInputActionValue& Value);
     
     UPROPERTY()
-    TObjectPtr<ASSGameLevelGameMode> GameMode;
+    TObjectPtr<ASsGameLevelGameMode> GameMode;
 
     UPROPERTY(EditDefaultsOnly, Category = "qq|Input")
     TObjectPtr<UInputMappingContext> InputMappingContext;

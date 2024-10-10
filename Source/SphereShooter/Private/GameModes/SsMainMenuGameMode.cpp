@@ -5,7 +5,7 @@
 #include "UI/MainMenu/SsMainMenuHUD.h"
 #include "Player/SsMainMenuPlayerController.h"
 
-ASSMainMenuGameMode::ASSMainMenuGameMode()
+ASsMainMenuGameMode::ASsMainMenuGameMode()
 {
     HUDClass = ASsMainMenuHUD::StaticClass();
     PlayerControllerClass = ASsMainMenuPlayerController::StaticClass();

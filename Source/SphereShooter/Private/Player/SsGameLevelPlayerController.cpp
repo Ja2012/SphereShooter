@@ -30,7 +30,7 @@ void ASsGameLevelPlayerController::BeginPlay()
     InputMode.SetConsumeCaptureMouseDown(false);
     SetInputMode(InputMode);
 
-    SSGameMode = GetWorld()->GetAuthGameMode<ASSGameLevelGameMode>();
+    SSGameMode = GetWorld()->GetAuthGameMode<ASsGameLevelGameMode>();
     RollBallSpawnLoc = SSGameMode->GetRollBallSpawn()->GetActorLocation();
     SSPawn = Cast<ASsPawn>(GetPawn());
 }

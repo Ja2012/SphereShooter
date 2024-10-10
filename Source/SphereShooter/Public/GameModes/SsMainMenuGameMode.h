@@ -9,11 +9,11 @@
 
 
 UCLASS()
-class SPHERESHOOTER_API ASSMainMenuGameMode : public AGameModeBase
+class SPHERESHOOTER_API ASsMainMenuGameMode : public AGameModeBase
 {
 	GENERATED_BODY()
 
 public:
-	ASSMainMenuGameMode();
+	ASsMainMenuGameMode();
 	
 };

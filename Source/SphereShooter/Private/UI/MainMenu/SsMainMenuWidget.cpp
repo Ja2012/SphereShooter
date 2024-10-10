@@ -28,7 +28,7 @@ void USsMainMenuWidget::NativeOnInitialized()
 
 void USsMainMenuWidget::OnStart()
 {
-    USsGameInstance* SSGameInstance = GetSTUGameInstance();
+    USsGameInstance* SSGameInstance = GetGameInstance();
     if (!SSGameInstance) return;
 
     UGameplayStatics::OpenLevel(this, SSGameInstance->GetStartupLevel()->LevelName);
@@ -41,15 +41,15 @@ void USsMainMenuWidget::OnExit()
 
 void USsMainMenuWidget::InitLevelItems()
 {
-    USsGameInstance* SSGameInstance = GetSTUGameInstance();
-    if (!SSGameInstance) return;
+    USsGameInstance* SsGameInstance = GetGameInstance();
+    if (!SsGameInstance) return;
 
-    checkf(SSGameInstance->GetLevels()->Num() != 0, TEXT("no levels"));
+    checkf(SsGameInstance->GetLevels()->Num() != 0, TEXT("no levels"));
 
     if (!LevelItemsBox) return;
     LevelItemsBox->ClearChildren();
 
-    for (const FSsLevelData& LevelData : *SSGameInstance->GetLevels())
+    for (const FSsLevelData& LevelData : *SsGameInstance->GetLevels())
     {
         USsLevelItemWidget* LevelItemWidget = CreateWidget<USsLevelItemWidget>(GetWorld(), LevelItemWidgetClass);
         if (!LevelItemWidget) continue;
@@ -61,22 +61,22 @@ void USsMainMenuWidget::InitLevelItems()
         LevelItemWidgets.Add(LevelItemWidget);
     }
 
-    if (!SSGameInstance->GetStartupLevel())
+    if (!SsGameInstance->GetStartupLevel())
     {
-        OnLevelSelected(SSGameInstance->GetLevels()->GetData());
+        OnLevelSelected(SsGameInstance->GetLevels()->GetData());
     }
     else
     {
-        OnLevelSelected(SSGameInstance->GetStartupLevel());
+        OnLevelSelected(SsGameInstance->GetStartupLevel());
     }
 }
 
 void USsMainMenuWidget::OnLevelSelected(FSsLevelData* Data)
 {
-    USsGameInstance* SSGameInstance = GetSTUGameInstance();
-    if (!SSGameInstance) return;
+    USsGameInstance* SsGameInstance = GetGameInstance();
+    if (!SsGameInstance) return;
 
-    SSGameInstance->SetStartupLevel(Data);
+    SsGameInstance->SetStartupLevel(Data);
 
     for (USsLevelItemWidget* LevelItemWidget : LevelItemWidgets)
     {
@@ -88,7 +88,7 @@ void USsMainMenuWidget::OnLevelSelected(FSsLevelData* Data)
     }
 }
 
-USsGameInstance* USsMainMenuWidget::GetSTUGameInstance() const
+USsGameInstance* USsMainMenuWidget::GetGameInstance() const
 {
     if (!GetWorld()) return nullptr;
     return GetWorld()->GetGameInstance<USsGameInstance>();

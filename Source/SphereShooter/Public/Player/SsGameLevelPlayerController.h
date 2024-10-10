@@ -7,7 +7,7 @@
 
 #include "SsGameLevelPlayerController.generated.h"
 
-class ASSGameLevelGameMode;
+class ASsGameLevelGameMode;
 class ASsPawn;
 
 UCLASS()
@@ -22,7 +22,7 @@ protected:
     virtual void BeginPlay() override;
 
 private:
-    TObjectPtr<ASSGameLevelGameMode> SSGameMode;
+    TObjectPtr<ASsGameLevelGameMode> SSGameMode;
     TObjectPtr<ASsPawn> SSPawn;
     FVector RollBallSpawnLoc;
 };

@@ -34,7 +34,7 @@ void ASsPawn::BeginPlay()
 {
     Super::BeginPlay();
 
-    GameMode = Cast<ASSGameLevelGameMode>(GetWorld()->GetAuthGameMode());
+    GameMode = Cast<ASsGameLevelGameMode>(GetWorld()->GetAuthGameMode());
 
     AimBeamNiagaraComponent->SetWorldLocation(GameMode->GetRollBallSpawn()->GetActorLocation() + FVector(0, 0, 1.f));
     AimBeamNiagaraComponent->SetAsset(AimBeamNiagaraSystem);
