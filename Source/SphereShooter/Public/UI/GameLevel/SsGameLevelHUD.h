@@ -27,5 +27,6 @@ protected:
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "q")
     TSubclassOf<UUserWidget> GameLevelWidgetClass;
 
+    UPROPERTY()
     TObjectPtr<USsGameLevelWidget> GameLevelWidget;
 };

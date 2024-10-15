@@ -16,9 +16,17 @@ void USsGameInstance::Init()
         UGameplayStatics::SaveGameToSlot(SaveGameInstance, DefaultGameSlotName, DefaultUserIndex);
     }
 
-    if (SaveGameInstance->Players.IsEmpty())
+    if (SaveGameInstance->GetPlayers().IsEmpty())
     {
-        SaveGameInstance->Players.Emplace(DefaultPlayerName, 0, FDateTime::Now(), GameLevelsData[0].LevelName);
+        SaveGameInstance->GetPlayers().Emplace(DefaultPlayerName, FSsPlayerData(0, FDateTime::Now(), GameLevelsData[0].LevelName));
+
+        // TODO debug
+        //for (int i = 0; i < 100; ++i)
+        //{
+        //    SaveGameInstance->GetPlayers().Emplace(FString::FromInt(i), FSsPlayerData(0, FDateTime::Now(), GameLevelsData[0].LevelName));
+        //}
+
+        SaveGameInstance->SetLastPlayerName(DefaultPlayerName);
     }
 }
 

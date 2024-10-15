@@ -5,15 +5,15 @@
 
 #include "UI/MainMenu/SsMainMenuWidget.h"
 
-void ASsMainMenuHUD::BeginPlay() 
+void ASsMainMenuHUD::BeginPlay()
 {
     Super::BeginPlay();
     if (MenuWidgetClass)
     {
-        USsMainMenuWidget* MenuWidget = CreateWidget<USsMainMenuWidget>(GetWorld(), MenuWidgetClass);
-        if (MenuWidget)
+        MainMenuWidget = CreateWidget<USsMainMenuWidget>(GetWorld(), MenuWidgetClass);
+        if (MainMenuWidget)
         {
-            MenuWidget->AddToViewport();
+            MainMenuWidget->AddToViewport();
         }
     }
 }

@@ -55,7 +55,7 @@ void ASsGameLevelGameMode::Init()
     SetRollBall();
     InitGrid();
 
-    PlayerState->UpdateFromPlayerData(GameInstance->GetSaveGameInstance()->GetLastPlayerData());
+    PlayerState->UpdateFromPlayerData(GameInstance->GetSaveGameInstance()->GetLastPlayer());
     HUD->GetWidget()->OnExitClicked.AddUObject(this, &ASsGameLevelGameMode::ExitLevel);
     HUD->UpdateMatchInfo(PlayerState);
 }
@@ -303,7 +303,7 @@ uint8 ASsGameLevelGameMode::HandleStrikes(const std::unordered_set<FSsTile*>& Sa
 
 void ASsGameLevelGameMode::ExitLevel() 
 {
-    GameInstance->GetSaveGameInstance()->GetLastPlayerData()->UpdateFromPlayerState(PlayerState);
+    GameInstance->GetSaveGameInstance()->GetLastPlayer()->UpdateFromPlayerState(PlayerState);
     GameInstance->SaveGame(GameInstance->GetSaveGameInstance());
     UGameplayStatics::OpenLevel(this, GameInstance->GetMainMenuLevelName());
 }

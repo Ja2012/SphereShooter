@@ -14,9 +14,6 @@ struct FSsPlayerData
     GENERATED_USTRUCT_BODY()
 
     UPROPERTY()
-    FString PlayerName;
-
-    UPROPERTY()
     uint64 MaxScore{0};
 
     UPROPERTY()
@@ -34,11 +31,21 @@ class SPHERESHOOTER_API USsSaveGame : public USaveGame
     GENERATED_BODY()
 
 public:
+    FSsPlayerData* GetLastPlayer() { return &Players[LastPlayerName]; }
+
+    TMap<FString, FSsPlayerData>& GetPlayers() { return Players; }
+
+    FString GetLastPlayerName() const { return LastPlayerName; }
+    void SetLastPlayerName(const FString Name) { LastPlayerName = Name; }
+
+    void AddPlayer(const FString PlayerName, const FSsPlayerData& PlayerData);
+
+    void SortPlayersByScore();
+
+private:
     UPROPERTY()
-    TArray<FSsPlayerData> Players;
+    TMap<FString, FSsPlayerData> Players;
 
     UPROPERTY()
-    uint64 LastPlayerIndex{0};
-
-    FSsPlayerData* GetLastPlayerData() { return &Players[LastPlayerIndex]; }
+    FString LastPlayerName;
 };

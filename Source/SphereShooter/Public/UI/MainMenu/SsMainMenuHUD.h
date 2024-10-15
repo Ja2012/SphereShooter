@@ -7,9 +7,8 @@
 
 #include "SsMainMenuHUD.generated.h"
 
-/**
- * 
- */
+class USsMainMenuWidget;
+
 UCLASS()
 class SPHERESHOOTER_API ASsMainMenuHUD : public AHUD
 {
@@ -20,4 +19,7 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "q")
 	TSubclassOf<UUserWidget> MenuWidgetClass;	
+
+    UPROPERTY()
+    TObjectPtr<USsMainMenuWidget> MainMenuWidget;
 };
