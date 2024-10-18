@@ -19,7 +19,7 @@ class USsBallType;
 class USsGameInstance;
 struct FGameplayTag;
 struct FSsTile;
-    
+
 UCLASS()
 class SPHERESHOOTER_API ASsGameLevelGameMode : public AGameModeBase
 {
@@ -40,6 +40,40 @@ public:
 protected:
     virtual void BeginPlay() override;
 
+    UPROPERTY(EditAnywhere, Category = "qq")
+    uint8 NumOfGridRowsWithBalls = 10;
+
+    UPROPERTY(EditAnywhere, Category = "qq")
+    uint8 MissesLimitNum = 5;
+
+    UPROPERTY(EditAnywhere, Category = "qq")
+    float GridMoveDistance = 1.f;
+
+    UPROPERTY(EditAnywhere, Category = "qq")
+    uint8 BallsMinimumToGetStrike = 3;
+
+    void SetKeyActors();
+    void Init();
+    void InitGrid();
+    void LoadBallTypeDataAsset();
+    void OnLoadBallTypeDataAsset();
+    void SetBallCDO() const;
+    void SetRollBall(ESsColor Color = ESsColor::ESSC_NoColor) const;
+
+    void AddPoints(const uint8 StrikeCount, const uint8 DropCount) const;
+    void HandleStrikesDestroy(const std::unordered_set<FSsTile*>& Tiles);
+    void HandleDropsDestroy(const std::unordered_set<FSsTile*>& Tiles);
+    bool IsBallsCrossedLine() const;
+    void HandleMisses() const;
+
+    void GameOver();
+    void ExitLevel();
+
+    UFUNCTION()
+    void OnRollBallHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse,
+        const FHitResult& Hit);
+
+    //
     UPROPERTY()
     TObjectPtr<ASsGrid> Grid;
 
@@ -55,37 +89,7 @@ protected:
     UPROPERTY()
     TObjectPtr<USsBallType> BallType;
 
-    // tag of scene actor that point to player roll ball start position
-    UPROPERTY(EditDefaultsOnly, Category = "qq")
-    FName PlayerBallPositionMarkActorTag = "PlayerBallXYLocation";
-    void SetKeyActors();
-
-    UPROPERTY(EditAnywhere, Category = "qq")
-    uint8 NumOfGridRowsWithBalls = 10;
-
-    UPROPERTY(EditAnywhere, Category = "qq")
-    uint8 MissesLimitNum = 5;
-
-    UPROPERTY(EditAnywhere, Category = "qq")
-    float GridMoveDistance = 1.f;
-
-    void Init();
-    void InitGrid();
-    void LoadBallTypeDataAsset();
-    void OnLoadBallTypeDataAsset();
-    void SetBallCDO() const;
-    void SetRollBall(ESsColor Color = ESsColor::ESSC_NoColor) const;
-    bool IsBallsCrossedLine() const;
-    void GameOver();
-
-    UFUNCTION()
-    void OnRollBallHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse,
-        const FHitResult& Hit);
-
-    void AddPoints(const uint8 StrikeCount, const uint8 DropCount) const;
-    void HandleMisses() const;
-    uint8 HandleStrikes(const std::unordered_set<FSsTile*>& SameColorTiles) const;
-
+    //
     UPROPERTY()
     TObjectPtr<ASsGameLevelPlayerController> PlayerController;
 
@@ -103,6 +107,4 @@ protected:
 
     UPROPERTY()
     TObjectPtr<ASsGameLevelHUD> HUD;
-
-    void ExitLevel();
 };

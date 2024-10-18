@@ -10,7 +10,6 @@
 
 #include "SsGrid.generated.h"
 
-
 struct FGameplayTag;
 
 /**
@@ -26,36 +25,43 @@ class SPHERESHOOTER_API ASsGrid : public ASsTaggedActor
 public:
     ASsGrid();
     void GenerateGrid();
-    
-    const FSsTile* GetLowestTileWithBall() const
-    {
-        return &Tiles[ //
-            Tiles.FindLastByPredicate([](const FSsTile& Tile) { return !Tile.Empty(); })
-            ];
-    }
-
-    static bool IsTileWithBallConnectedToTop(const FSsTile* TargetTile);
-    static void GetTilesWithBallsNotConnectedToTop(FSsTile* TargetTile, std::unordered_set<FSsTile*>& TilesNotConnectedToGrid);
-    static void GetSameColorConnectedTilesWithBalls(FSsTile* TargetTile, std::unordered_set<FSsTile*>& SameColorConnectedTiles);
-    static void GetTilesNeighboursCloseToPointSorted(const FVector& PointLoc, const FSsTile* TargetTile, TArray<FSsTile*>& TilesCloseToPoint);
     void MoveDown();
     void SpawnBalls();
+
+    const FSsTile* GetLowestTileWithBall() const
+    {
+        return &Tiles[  //
+            Tiles.FindLastByPredicate([](const FSsTile& Tile) { return !Tile.Empty(); })];
+    }
+
+    // Using tiles with balls only
+    void GetColorConnectedBalls(FSsTile* TargetTile, std::unordered_set<FSsTile*>& ResultSameColorConnectedTiles) const;
+
+    void GetTilesNeighboursCloseToPointSorted(
+        const FVector& PointLoc, const FSsTile* TargetTile, TArray<FSsTile*>& ResultTilesCloseToPointSorted) const;
+
+    // Get tiles with balls not connected to grid, flying balls. Using tiles with balls only.
+    void GetOutOfGridBalls(const std::unordered_set<FSsTile*>& StarTiles, std::unordered_set<FSsTile*>& ResultNotAttachedTiles) const;
 
 protected:
     TArray<FSsTile> Tiles{};
     uint8 ColumnsNum{0};
     uint8 RowsNum{0};
     using FTileMemberPtr = FSsTile* FSsTile::*;
+
+    // Using tiles with balls only. Check if ball is connected to any ball on grid top.
+    // GhostTiles is tiles with balls that will be destroyed in next moment, so assume there is no ball.
+    static bool IsBallConnectedToTop(const FSsTile* TargetTile, const std::unordered_set<FSsTile*>& GhostTiles);
+
+    // Using tiles with balls only. GhostTiles is tiles with balls that will be destroyed in next moment, so assume there is no ball.
+    static void GetBallsNotConnectedToTop(
+        FSsTile* TargetTile, std::unordered_set<FSsTile*>& TilesNotConnectedToGrid, std::unordered_set<FSsTile*>& GhostTiles);
+
     void SetNeighbor(FSsTile& Tile, const FTileMemberPtr TileMember);
-    
     void IDToRowColumn(const uint32 ID, uint8& OutRow, uint8& OutCurrentColumn) const
     {
         OutRow = ID / ColumnsNum;
         OutCurrentColumn = ID % ColumnsNum;
     }
-
-    uint32 RowColumnToID(const uint8 Row, const uint8 CurrentColumn) const
-    {
-        return Row * ColumnsNum + CurrentColumn;
-    };
+    uint32 RowColumnToID(const uint8 Row, const uint8 CurrentColumn) const { return Row * ColumnsNum + CurrentColumn; };
 };

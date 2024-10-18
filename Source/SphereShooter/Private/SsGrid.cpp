@@ -9,7 +9,6 @@
 
 DEFINE_LOG_CATEGORY_STATIC(ASSGridLog, All, All);
 
-// Sets default values
 ASsGrid::ASsGrid()
 {
     PrimaryActorTick.bCanEverTick = false;
@@ -86,27 +85,27 @@ void ASsGrid::SetNeighbor(FSsTile& Tile, const FTileMemberPtr TileMemberPtr)
     uint8 Col {0}; 
     if (TileMemberPtr == &FSsTile::TopLeft)
     {
-        Row = Tile.Row - 1; Col = bIsOddRow ? Tile.Column : Tile.Column - 1;
+        Row = Tile.Row - 1;      Col = bIsOddRow ? Tile.Column : Tile.Column - 1;
     }
     else if (TileMemberPtr == &FSsTile::TopRight)
     {
-        Row = Tile.Row - 1; Col = bIsOddRow ? Tile.Column + 1 : Tile.Column;
+        Row = Tile.Row - 1;      Col = bIsOddRow ? Tile.Column + 1 : Tile.Column;
     }
     else if (TileMemberPtr == &FSsTile::Left)
     {
-        Row = Tile.Row; Col = Tile.Column - 1;
+        Row = Tile.Row;          Col = Tile.Column - 1;
     }
     else if (TileMemberPtr == &FSsTile::Right)
     {
-        Row = Tile.Row; Col = Tile.Column + 1;
+        Row = Tile.Row;          Col = Tile.Column + 1;
     }
     else if (TileMemberPtr == &FSsTile::BottomLeft)
     {
-        Row = Tile.Row + 1; Col = bIsOddRow ? Tile.Column : Tile.Column - 1;
+        Row = Tile.Row + 1;      Col = bIsOddRow ? Tile.Column : Tile.Column - 1;
     }
     else if (TileMemberPtr == &FSsTile::BottomRight)
     {
-        Row = Tile.Row + 1; Col = bIsOddRow ? Tile.Column + 1 : Tile.Column;
+        Row = Tile.Row + 1;      Col = bIsOddRow ? Tile.Column + 1 : Tile.Column;
     }
     const uint32 ID = RowColumnToID(Row, Col);
     if (Tiles.IsValidIndex(ID))
@@ -118,9 +117,8 @@ void ASsGrid::SetNeighbor(FSsTile& Tile, const FTileMemberPtr TileMemberPtr)
 
 }
 
-// check if ball is connected to any ball on grid top.
-// for tiles with balls
-bool ASsGrid::IsTileWithBallConnectedToTop(const FSsTile* TargetTile)
+
+bool ASsGrid::IsBallConnectedToTop(const FSsTile* TargetTile, const std::unordered_set<FSsTile*>& GhostTiles)
 {
     // Use Greedy Best First Search. Grid is weighted, undirected graph. Tile with ball is node in graph.
     // Heuristic made with operator< for Tile row and priority_queue, so that top (up) tiles are in priority.    
@@ -138,9 +136,9 @@ bool ASsGrid::IsTileWithBallConnectedToTop(const FSsTile* TargetTile)
             return true;
         }
 
-        for (const FSsTile* Tile : CurrentTile->Neighbors)
+        for (FSsTile* Tile : CurrentTile->Neighbors)
         {
-            if (!Tile || Tile->Empty() || CameFrom.contains(Tile)) continue;
+            if (!Tile || Tile->Empty() || CameFrom.contains(Tile) || GhostTiles.contains(Tile)) continue;
             if (Tile->Row == 0) return true;
             CameFrom[Tile] = CurrentTile;
             Frontier.push(Tile);
@@ -174,28 +172,28 @@ void ASsGrid::MoveDown()
     }
 }
 
-void ASsGrid::GetSameColorConnectedTilesWithBalls(FSsTile* TargetTile, std::unordered_set<FSsTile*>& SameColorConnectedTiles)
+void ASsGrid::GetColorConnectedBalls(FSsTile* TargetTile, std::unordered_set<FSsTile*>& ResultSameColorConnectedTiles) const
 {
     std::vector<FSsTile*> Frontier{TargetTile};
     while (!Frontier.empty())
     {
         FSsTile* CurrentTile = Frontier.back();
-        SameColorConnectedTiles.insert(CurrentTile);
+        ResultSameColorConnectedTiles.insert(CurrentTile);
         Frontier.pop_back();
 
         for (FSsTile* Tile : CurrentTile->Neighbors)
         {
-            if (!Tile || Tile->Empty() || Tile->Color != TargetTile->Color || SameColorConnectedTiles.contains(Tile)) continue;
+            if (!Tile || Tile->Empty() || Tile->Color != TargetTile->Color || ResultSameColorConnectedTiles.contains(Tile)) continue;
             Frontier.push_back(Tile);
         }
     }
 }
 
-void ASsGrid::GetTilesNeighboursCloseToPointSorted(const FVector& PointLoc, const FSsTile* TargetTile, TArray<FSsTile*>& TilesCloseToPoint)
+void ASsGrid::GetTilesNeighboursCloseToPointSorted(const FVector& PointLoc, const FSsTile* TargetTile, TArray<FSsTile*>& ResultTilesCloseToPointSorted) const
 {
-    Algo::CopyIf(TargetTile->Neighbors, TilesCloseToPoint, //
+    Algo::CopyIf(TargetTile->Neighbors, ResultTilesCloseToPointSorted, //
     [](const FSsTile* NeighbourTile) { return NeighbourTile != nullptr; });
-    Algo::Sort(TilesCloseToPoint, //
+    Algo::Sort(ResultTilesCloseToPointSorted, //
         [&PointLoc](const FSsTile* A, const FSsTile* B)
         {
             return (A->Location - PointLoc).Length() < (B->Location - PointLoc).Length();
@@ -203,7 +201,8 @@ void ASsGrid::GetTilesNeighboursCloseToPointSorted(const FVector& PointLoc, cons
 
 }
 
-void ASsGrid::GetTilesWithBallsNotConnectedToTop(FSsTile* TargetTile, std::unordered_set<FSsTile*>& TilesNotConnectedToGrid)
+void ASsGrid::GetBallsNotConnectedToTop(
+    FSsTile* TargetTile, std::unordered_set<FSsTile*>& TilesNotConnectedToGrid, std::unordered_set<FSsTile*>& GhostTiles)
 {
     std::vector<FSsTile*> Frontier{TargetTile};
     while (!Frontier.empty())
@@ -214,8 +213,50 @@ void ASsGrid::GetTilesWithBallsNotConnectedToTop(FSsTile* TargetTile, std::unord
 
         for (FSsTile* Tile : CurrentTile->Neighbors)
         {
-            if (!Tile || Tile->Empty() || TilesNotConnectedToGrid.contains(Tile)) continue;
+            if (!Tile || Tile->Empty()) continue;
+            if (TilesNotConnectedToGrid.contains(Tile) || GhostTiles.contains(Tile)) continue;
+
+            GhostTiles.insert(Tile);
             Frontier.push_back(Tile);
+        }
+    }
+}
+
+void ASsGrid::GetOutOfGridBalls(
+    const std::unordered_set<FSsTile*>& StarTiles, std::unordered_set<FSsTile*>& ResultNotAttachedTiles) const
+{
+    // find strike neighbours
+    std::unordered_set<FSsTile*> StrikeNeighbours;
+    for (FSsTile* StrikeTile : StarTiles)
+    {
+        for (FSsTile* NeighbourTile : StrikeTile->Neighbors)
+        {
+            if (!NeighbourTile || NeighbourTile->Empty() || StarTiles.contains(NeighbourTile) ||
+                StrikeNeighbours.contains(NeighbourTile))
+                continue;
+            StrikeNeighbours.insert(NeighbourTile);
+        }
+    }
+
+    // assume that start balls will be destroyed next moment so except them from next calculations
+    std::unordered_set<FSsTile*> TilesToDestroy = StarTiles;
+
+    // look for flying balls, so that we don't overuse Greedy Best First Search Algorithm (IsTileConnectedToGrid)
+    std::unordered_set<FSsTile*>::iterator NextIter;
+    for (std::unordered_set<FSsTile*>::iterator Iter = StrikeNeighbours.begin(), IteratorEnd = StrikeNeighbours.end(); Iter != IteratorEnd;
+         ++Iter)
+    {
+        if (FSsTile* NeighbourTile = *Iter)
+        {
+            // We don't need check grid connection for every NeighbourTile, because there is neighbour of neighbour.
+            // optimize so again, we don't overuse Greedy Best First Search Algorithm (IsTileConnectedToGrid)
+            NextIter = std::next(Iter);
+            if (NextIter != IteratorEnd && (*NextIter)->Neighbors.contains(NeighbourTile)) continue;
+
+            if (!IsBallConnectedToTop(NeighbourTile, TilesToDestroy))
+            {
+                GetBallsNotConnectedToTop(NeighbourTile, ResultNotAttachedTiles, TilesToDestroy);
+            }
         }
     }
 }

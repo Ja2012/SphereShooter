@@ -193,42 +193,39 @@ void ASsGameLevelGameMode::OnRollBallHit(UPrimitiveComponent* HitComponent, AAct
         return;
     }
 
-    uint8 StrikeCount = 0;
-    uint8 DropCount = 0;
+    // check hits
+    std::unordered_set<FSsTile*> SameColorBalls;
+    Grid->GetColorConnectedBalls(TileToLand, SameColorBalls);
 
-    // check if hit same color
-    std::unordered_set<FSsTile*> SameColorTiles{};
-    Grid->GetSameColorConnectedTilesWithBalls(TileToLand, SameColorTiles);
-
-    if (SameColorTiles.size() >= 3)
+    std::unordered_set<FSsTile*> NotAttachedBalls;
+    if (SameColorBalls.size() >= BallsMinimumToGetStrike)
     {
-        StrikeCount = SameColorTiles.size();
-        DropCount = HandleStrikes(SameColorTiles);
+        Grid->GetOutOfGridBalls(SameColorBalls, NotAttachedBalls);
+        HandleStrikesDestroy(SameColorBalls);
+        HandleDropsDestroy(NotAttachedBalls);
+        AddPoints(SameColorBalls.size(), NotAttachedBalls.size());
     }
+    else
+    {
+        HandleMisses();
+    }
+    HUD->UpdateMatchInfo(PlayerState);
 
-    AddPoints(StrikeCount, DropCount);
-    if (!DropCount && !StrikeCount) HandleMisses();
     if (IsBallsCrossedLine())
     {
         GameOver();
         return;
-    }
-    
-    HUD->UpdateMatchInfo(PlayerState);
+    }    
     SetRollBall();
 }
 
 void ASsGameLevelGameMode::AddPoints(const uint8 StrikeCount, const uint8 DropCount) const
 {
     const uint64 PointsOld = PlayerState->GetScore();
-    // TODO here come code to count win points for strikes / VFX?
-    if (StrikeCount > 2)
-    {
-        PlayerState->SetScore(PointsOld + StrikeCount);
-        UE_LOG(LogTemp, Display, TEXT("Strike %d balls | Points: %d -> %d"), StrikeCount, PointsOld, PlayerState->GetScore());
-    }
 
-    // TODO here come code to count win points for drop balls / VFX?
+    PlayerState->SetScore(PointsOld + StrikeCount);
+    UE_LOG(LogTemp, Display, TEXT("Strike %d balls | Points: %d -> %d"), StrikeCount, PointsOld, PlayerState->GetScore());    
+
     if (DropCount)
     {
         PlayerState->SetScore(PointsOld + DropCount);
@@ -236,6 +233,24 @@ void ASsGameLevelGameMode::AddPoints(const uint8 StrikeCount, const uint8 DropCo
     }
 
     PlayerState->UpdateMaxScore(PlayerState->GetScore());
+}
+
+void ASsGameLevelGameMode::HandleStrikesDestroy(const std::unordered_set<FSsTile*>& Tiles)
+{
+    for (FSsTile* TileToBoom : Tiles)
+    {
+        if (ASsSphere* Ball = TileToBoom->Ball.Get()) Ball->Destroy();
+        TileToBoom->Reset();
+    }
+}
+
+void ASsGameLevelGameMode::HandleDropsDestroy(const std::unordered_set<FSsTile*>& Tiles)
+{
+    for (FSsTile* TileToDrop : Tiles)
+    {
+        if (ASsSphere* Ball = TileToDrop->Ball.Get()) Ball->Destroy();
+        TileToDrop->Reset();
+    }
 }
 
 void ASsGameLevelGameMode::HandleMisses() const
@@ -251,56 +266,6 @@ void ASsGameLevelGameMode::HandleMisses() const
     }   
 }
 
-uint8 ASsGameLevelGameMode::HandleStrikes(const std::unordered_set<FSsTile*>& SameColorTiles) const
-{
-    uint8 DropCount = 0;
-    
-    // find strike neighbours and then destroy strike 
-    std::unordered_set<FSsTile*> TilesInStrike{};
-    for (FSsTile* StrikeTile : SameColorTiles)
-    {
-        for (FSsTile* NeighbourTile : StrikeTile->Neighbors)
-        {
-            if (!NeighbourTile || NeighbourTile->Empty() || //
-                SameColorTiles.contains(NeighbourTile) || //
-                TilesInStrike.contains(NeighbourTile))
-                continue;
-            TilesInStrike.insert(NeighbourTile);
-        }
-        if (ASsSphere* Ball = StrikeTile->Ball.Get()) Ball->Destroy();
-        StrikeTile->Reset();
-    }
-
-    // look for flying balls, destroy and then repeat, so that we don't overuse Greedy Best First Search Algorithm (IsTileConnectedToGrid)
-    std::unordered_set<FSsTile*> TilesToDrop{};
-    for (std::unordered_set<FSsTile*>::iterator Iter = TilesInStrike.begin(), IteratorEnd = TilesInStrike.end();
-         Iter != IteratorEnd; ++Iter)
-    {
-        if (FSsTile* NeighbourTile = *Iter)
-        {
-
-            // We don't need check grid connection for every NeighbourTile, because there is neighbour of neighbour.
-            // optimize so again, we don't overuse Greedy Best First Search Algorithm (IsTileConnectedToGrid)
-            std::unordered_set<FSsTile*>::iterator NextIter = std::next(Iter);
-            if (NextIter != IteratorEnd && (*NextIter)->Neighbors.contains(NeighbourTile)) continue;
-
-            if (!Grid->IsTileWithBallConnectedToTop(NeighbourTile))
-            {
-                Grid->GetTilesWithBallsNotConnectedToTop(NeighbourTile, TilesToDrop);
-            }
-
-            for (FSsTile* TileToDrop : TilesToDrop)
-            {
-                if (ASsSphere* Ball = TileToDrop->Ball.Get()) Ball->Destroy();
-                TileToDrop->Reset();
-                DropCount++;
-            }
-            TilesToDrop.clear();
-        }
-    }
-    return DropCount;
-}
-
 void ASsGameLevelGameMode::ExitLevel() 
 {
     GameInstance->GetSaveGameInstance()->GetLastPlayer()->UpdateFromPlayerState(PlayerState);
@@ -310,9 +275,7 @@ void ASsGameLevelGameMode::ExitLevel()
 
 bool ASsGameLevelGameMode::IsBallsCrossedLine() const
 {
-    const FSsTile* Tile = Grid->GetLowestTileWithBall();
-    UE_LOG(LogTemp, Display, TEXT("Lowest ball is: %s, row %d, column %d"), *UEnum::GetValueAsString(Tile->Color), Tile->Row, Tile->Column);
-    return Tile->Location.X - (BallType->MeshDiameter / 2.f) <= CrossLine->GetActorLocation().X;
+    return (Grid->GetLowestTileWithBall()->Location.X - (BallType->MeshDiameter / 2.f)) <= CrossLine->GetActorLocation().X;
 }
 
 void ASsGameLevelGameMode::GameOver()
