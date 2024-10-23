@@ -290,9 +290,7 @@ void ASsGameLevelGameMode::SetBallCDO() const
 {
     const ASsSphere* BallCDO = Cast<ASsSphere>(BallType->SphereClass->GetDefaultObject());
 
-    BallCDO->StaticMeshComponent->SetStaticMesh(BallType->Mesh);
     BallCDO->SphereCollisionComponent->SetSphereRadius(BallType->CollisionDiameter / 2.f);
-
-    const float MeshScale = (BallType->MeshDiameter / 2.f) / BallType->Mesh->GetBounds().GetSphere().W;
+    const float MeshScale = (BallType->MeshDiameter / 2.f) / BallCDO->StaticMeshComponent->GetStaticMesh()->GetBounds().GetSphere().W;
     BallCDO->StaticMeshComponent->SetWorldScale3D(FVector(MeshScale));
 }

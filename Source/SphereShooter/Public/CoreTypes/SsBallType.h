@@ -16,9 +16,6 @@ class SPHERESHOOTER_API USsBallType : public UDataAsset
 
 public:
     UPROPERTY(EditAnywhere, BlueprintReadOnly)
-    TObjectPtr<UStaticMesh> Mesh;
-
-    UPROPERTY(EditAnywhere, BlueprintReadOnly)
     TMap<ESsColor, TObjectPtr<UMaterialInstance>> MaterialInstances;
     
     UPROPERTY(EditAnywhere, BlueprintReadOnly)
