@@ -6,7 +6,7 @@
 #include "SsPawn.generated.h"
 
 struct FInputActionValue;
-class ASsSphere;
+class ASsBaseSphere;
 class ASsGameLevelGameMode;
 class UInputMappingContext;
 class UInputAction;
@@ -24,8 +24,8 @@ public:
     virtual void BeginPlay() override;
     virtual void PawnClientRestart() override;
 
-    void SetRollBall(ASsSphere* Ball) { CurrentRollBoll = Ball; }
-    ASsSphere* GetRollBall() const { return CurrentRollBoll; }
+    void SetRollBall(ASsBaseSphere* Ball) { CurrentRollBoll = Ball; }
+    ASsBaseSphere* GetRollBall() const { return CurrentRollBoll; }
     void Roll(const FVector& Impulse);    
     void SetAimBeamRotation(FRotator Rotator);
 
@@ -69,7 +69,7 @@ protected:
     FVector AimBeamLengthVarValue;
 
     UPROPERTY()
-    TObjectPtr<ASsSphere> CurrentRollBoll;
+    TObjectPtr<ASsBaseSphere> CurrentRollBoll;
 
     UPROPERTY()
     TObjectPtr<APlayerController> PlayerController;

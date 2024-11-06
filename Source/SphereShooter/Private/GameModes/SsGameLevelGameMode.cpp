@@ -2,7 +2,9 @@
 
 #include "CoreTypes/SsBallType.h"
 #include "Player/SsPawn.h"
-#include "SsSphere.h"
+#include "Sphere/SsBaseSphere.h"
+#include "Sphere/SsSphere.h"
+#include "Sphere/SsDestructibleSphere.h"
 #include "SsGrid.h"
 #include "SsGameInstance.h"
 #include "SsGameStateBase.h"
@@ -18,6 +20,7 @@
 #include "Components/SphereComponent.h"
 #include "DrawDebugHelpers.h"
 #include "NativeGameplayTags.h"
+#include "GeometryCollection/GeometryCollectionComponent.h"
 
 #include <unordered_set>
 
@@ -94,8 +97,8 @@ void ASsGameLevelGameMode::SetRollBall(ESsColor Color) const
     const FVector PlayerBallLocation = RollBallSpawn->GetActorLocation();
     // spawn
     const FTransform SpawnTransform{
-        FRotator::ZeroRotator, FVector(PlayerBallLocation.X, PlayerBallLocation.Y, BallType->MeshDiameter / 2.f), FVector(1.f)};
-    ASsSphere* RollBall = GetWorld()->SpawnActorDeferred<ASsSphere>(BallType->SphereClass, SpawnTransform);
+        FRotator::ZeroRotator, FVector(PlayerBallLocation.X, PlayerBallLocation.Y, BallType->TargetMeshDiameter / 2.f), FVector(1.f)};
+    ASsBaseSphere* RollBall = GetWorld()->SpawnActorDeferred<ASsBaseSphere>(BallType->SphereClass, SpawnTransform);
     RollBall->TurnIntoRollBall();
 
     if (Color == ESsColor::ESSC_NoColor)
@@ -108,8 +111,8 @@ void ASsGameLevelGameMode::SetRollBall(ESsColor Color) const
     }
 
     // set random material
-    RollBall->StaticMeshComponent->SetMaterial(0, BallType->MaterialInstances[Color]);
     RollBall->Color = Color;
+    RollBall->SetMaterial(BallType->MaterialInstances[Color]);
 
     // finish
     RollBall->FinishSpawning(SpawnTransform);
@@ -129,15 +132,15 @@ void ASsGameLevelGameMode::InitGrid()
 void ASsGameLevelGameMode::OnRollBallHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp,
     FVector NormalImpulse, const FHitResult& Hit)
 {
-    if (IsValid(OtherActor) && !OtherActor->IsA(ASsSphere::StaticClass())) return;
-    ASsSphere* RollBall = Cast<ASsSphere>(HitComponent->GetOwner());
+    if (IsValid(OtherActor) && !OtherActor->IsA(ASsBaseSphere::StaticClass())) return;
+    ASsBaseSphere* RollBall = Cast<ASsBaseSphere>(HitComponent->GetOwner());
 
-    const ASsSphere* GridBall = Cast<ASsSphere>(OtherActor);
+    const ASsBaseSphere* GridBall = Cast<ASsBaseSphere>(OtherActor);
     const double HitNormalYaw = Hit.ImpactNormal.Rotation().Yaw;
 
     // TODO debug
     UE_LOG(LogTemp, Display, TEXT("HIT!!! with yaw: %.2f"), HitNormalYaw);
-    // DrawDebugDirectionalArrow(GetWorld(), Hit.ImpactPoint, Hit.ImpactPoint + Hit.ImpactNormal * 100.f, BallType->MeshDiameter,
+    // DrawDebugDirectionalArrow(GetWorld(), Hit.ImpactPoint, Hit.ImpactPoint + Hit.ImpactNormal * 100.f, BallType->TargetMeshDiameter,
     //     FColor::White, false, 5, -1,
     //     3);
 
@@ -176,7 +179,7 @@ void ASsGameLevelGameMode::OnRollBallHit(UPrimitiveComponent* HitComponent, AAct
     {
         ensureMsgf(false, TEXT("Roll Ball out of edge!!!"));
         SetRollBall(RollBall->Color);
-        RollBall->Destroy();
+        RollBall->Kill();
         return;
     }
 
@@ -239,7 +242,7 @@ void ASsGameLevelGameMode::HandleStrikesDestroy(const std::unordered_set<FSsTile
 {
     for (FSsTile* TileToBoom : Tiles)
     {
-        if (ASsSphere* Ball = TileToBoom->Ball.Get()) Ball->Destroy();
+        if (ASsBaseSphere* Ball = TileToBoom->Ball.Get()) Ball->Kill();
         TileToBoom->Reset();
     }
 }
@@ -248,7 +251,7 @@ void ASsGameLevelGameMode::HandleDropsDestroy(const std::unordered_set<FSsTile*>
 {
     for (FSsTile* TileToDrop : Tiles)
     {
-        if (ASsSphere* Ball = TileToDrop->Ball.Get()) Ball->Destroy();
+        if (ASsBaseSphere* Ball = TileToDrop->Ball.Get()) Ball->Kill();
         TileToDrop->Reset();
     }
 }
@@ -275,7 +278,7 @@ void ASsGameLevelGameMode::ExitLevel()
 
 bool ASsGameLevelGameMode::IsBallsCrossedLine() const
 {
-    return (Grid->GetLowestTileWithBall()->Location.X - (BallType->MeshDiameter / 2.f)) <= CrossLine->GetActorLocation().X;
+    return (Grid->GetLowestTileWithBall()->Location.X - (BallType->TargetMeshDiameter / 2.f)) <= CrossLine->GetActorLocation().X;
 }
 
 void ASsGameLevelGameMode::GameOver()
@@ -288,9 +291,12 @@ void ASsGameLevelGameMode::GameOver()
 
 void ASsGameLevelGameMode::SetBallCDO() const
 {
-    const ASsSphere* BallCDO = Cast<ASsSphere>(BallType->SphereClass->GetDefaultObject());
+    ASsBaseSphere* BallCDO = Cast<ASsBaseSphere>(BallType->SphereClass->GetDefaultObject()); 
 
-    BallCDO->SphereCollisionComponent->SetSphereRadius(BallType->CollisionDiameter / 2.f);
-    const float MeshScale = (BallType->MeshDiameter / 2.f) / BallCDO->StaticMeshComponent->GetStaticMesh()->GetBounds().GetSphere().W;
-    BallCDO->StaticMeshComponent->SetWorldScale3D(FVector(MeshScale));
+    BallCDO->SphereCollisionComponent->SetSphereRadius(BallType->TargetCollisionDiameter / 2.f);
+
+    const float MeshRadius = BallCDO->GetMeshRadius();
+    const float BallRadius = BallType->TargetMeshDiameter / 2.f;
+    const float MeshScale = BallRadius / MeshRadius;
+    BallCDO->SetMeshScale(FVector(MeshScale));
 }

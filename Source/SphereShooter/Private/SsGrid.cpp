@@ -5,6 +5,8 @@
 #include "CoreTypes/SsBallType.h"
 #include "GameModes/SsGameLevelGameMode.h"
 
+#include "GeometryCollection/GeometryCollectionComponent.h"
+
 #include <unordered_map>
 
 DEFINE_LOG_CATEGORY_STATIC(ASSGridLog, All, All);
@@ -17,7 +19,7 @@ ASsGrid::ASsGrid()
 void ASsGrid::GenerateGrid()
 {
     ASsGameLevelGameMode* GameMode = Cast<ASsGameLevelGameMode>(GetWorld()->GetAuthGameMode());
-    const float BallSize = GameMode->GetBallType()->MeshDiameter;
+    const float BallSize = GameMode->GetBallType()->TargetMeshDiameter;
     const FVector PlayerBallLocation = GameMode->GetRollBallSpawn()->GetActorLocation();
     const FVector GridStartLoc = GetActorLocation();
 
@@ -155,7 +157,7 @@ void ASsGrid::MoveDown()
     // todo debug
     // FlushPersistentDebugLines(GetWorld());
     
-    const FVector MoveVector {-BallType->MeshDiameter * GameMode->GetGridMoveDistance(), 0, 0};
+    const FVector MoveVector {-BallType->TargetMeshDiameter * GameMode->GetGridMoveDistance(), 0, 0};
     SetActorLocation(GetActorLocation() + MoveVector);
     for (FSsTile& Tile: Tiles)
     {
@@ -278,7 +280,7 @@ void ASsGrid::SpawnBalls()
 
         if (Tile.bIsOutOfRightEdge) continue;
         const FTransform SpawnTransform{FRotator::ZeroRotator, Tile.Location, Scale};
-        ASsSphere* Ball = GetWorld()->SpawnActorDeferred<ASsSphere>(BallType->SphereClass, SpawnTransform);
+        ASsBaseSphere* Ball = GetWorld()->SpawnActorDeferred<ASsBaseSphere>(BallType->SphereClass, SpawnTransform);
 
         // find random color
         ESsColor Color = ESsColor::ESSC_NoColor;
@@ -293,8 +295,9 @@ void ASsGrid::SpawnBalls()
 
         // set random material
         Ball->Color = Color;
-        Ball->StaticMeshComponent->SetMaterial(0, BallType->MaterialInstances[Color]);
         Ball->Tile = &Tile;
+        Ball->SetMaterial(BallType->MaterialInstances[Color]);
+
         Ball->FinishSpawning(SpawnTransform);
 
     }

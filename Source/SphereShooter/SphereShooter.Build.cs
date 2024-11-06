@@ -17,7 +17,8 @@ public class SphereShooter : ModuleRules
 			"InputCore",
             "Niagara",
             "GameplayTags",
-			"UMG"
+			"UMG",
+            "GeometryCollectionEngine"
         }
         );
 

@@ -5,28 +5,30 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 
-#include "SsSphere.generated.h"
+#include "SsBaseSphere.generated.h"
 
 struct FSsTile;
 class USphereComponent;
 
-UCLASS()
-class SPHERESHOOTER_API ASsSphere : public AActor
+UCLASS(Abstract)
+class SPHERESHOOTER_API ASsBaseSphere : public AActor
 {
     GENERATED_BODY()
 
 public:
-    ASsSphere();
+    ASsBaseSphere();
     void TurnIntoRollBall();
     void TurnIntoGridBall();
     void Roll(const FVector& Impulse) const;
 
+    virtual float GetMeshRadius() const = 0;
+    virtual void SetMeshScale(FVector Scale) = 0;
+    virtual void SetMaterial(UMaterialInstance* Material) = 0;
+    virtual void Kill() = 0;
+
     UPROPERTY(VisibleAnywhere)
     TObjectPtr<USphereComponent> SphereCollisionComponent;
 
-    UPROPERTY(VisibleAnywhere)
-    TObjectPtr<UStaticMeshComponent> StaticMeshComponent;
-    
     ESsColor Color = ESsColor::ESSC_NoColor;
     FSsTile* Tile;
     

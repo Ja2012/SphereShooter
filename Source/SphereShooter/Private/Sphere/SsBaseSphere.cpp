@@ -1,49 +1,40 @@
-#include "SsSphere.h"
+#include "Sphere/SsBaseSphere.h"
 
 #include "Components/SphereComponent.h"
 
-ASsSphere::ASsSphere()
+ASsBaseSphere::ASsBaseSphere()
 {
 	PrimaryActorTick.bCanEverTick = false;
 
 	SphereCollisionComponent = CreateDefaultSubobject<USphereComponent>("SphereCollisionComponent");
     SetRootComponent(SphereCollisionComponent);
     SphereCollisionComponent->SetCollisionProfileName(UCollisionProfile::PhysicsActor_ProfileName);
-
-    StaticMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>("StaticMeshComponent");
-    StaticMeshComponent->SetupAttachment(SphereCollisionComponent);
-    StaticMeshComponent->SetSimulatePhysics(false);
-    StaticMeshComponent->SetCollisionProfileName(UCollisionProfile::NoCollision_ProfileName);
+    SphereCollisionComponent->SetLinearDamping(0.f);
+    SphereCollisionComponent->SetAngularDamping(0.f);
 
     TurnIntoGridBall();
 }
 
-void ASsSphere::Roll(const FVector& Impulse) const
+void ASsBaseSphere::Roll(const FVector& Impulse) const
 {
     if (!SphereCollisionComponent) return;
     SphereCollisionComponent->AddImpulse(Impulse, NAME_None, true);
 }
 
-void ASsSphere::TurnIntoRollBall() 
+void ASsBaseSphere::TurnIntoRollBall() 
 {
-    PrimaryActorTick.bCanEverTick = true;
     SphereCollisionComponent->SetSimulatePhysics(true);
     SphereCollisionComponent->SetNotifyRigidBodyCollision(true);
-
-    // no friction so we can roll indefinitely 
-    SphereCollisionComponent->SetLinearDamping(0.f);
-    SphereCollisionComponent->SetAngularDamping(0.f);
 }
 
-void ASsSphere::TurnIntoGridBall() 
+void ASsBaseSphere::TurnIntoGridBall() 
 {
-    PrimaryActorTick.bCanEverTick = false;
     SphereCollisionComponent->SetSimulatePhysics(false);
     SphereCollisionComponent->SetNotifyRigidBodyCollision(false);
     SphereCollisionComponent->OnComponentHit.Clear();
 }
 
-void ASsSphere::BeginPlay() 
+void ASsBaseSphere::BeginPlay() 
 {
     Super::BeginPlay();
 

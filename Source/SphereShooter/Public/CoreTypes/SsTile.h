@@ -1,7 +1,7 @@
 #pragma once
 
 #include "CoreTypes/SsColor.h"
-#include "SsSphere.h"
+#include "Sphere/SsBaseSphere.h"
 
 #include "CoreMinimal.h"
 
@@ -21,7 +21,7 @@ struct FSsTile
         Color = ESsColor::ESSC_NoColor;
     }
 
-    void Set(ASsSphere* InBall)
+    void Set(ASsBaseSphere* InBall)
     {
         Ball = InBall;
         Ball->Tile = this;
@@ -35,7 +35,7 @@ struct FSsTile
     uint8 Row{0};
     uint8 Column{0};
     bool bIsOutOfRightEdge = false;
-    TWeakObjectPtr<class ASsSphere> Ball = nullptr;
+    TWeakObjectPtr<class ASsBaseSphere> Ball = nullptr;
     ESsColor Color = ESsColor::ESSC_NoColor;
 
     FSsTile* Left = nullptr;

@@ -13,7 +13,7 @@ class ASsGameStateBase;
 class ASsGrid;
 class ASsPawn;
 class ASsPlayerState;
-class ASsSphere;
+class ASsBaseSphere;
 class ASsTaggedActor;
 class USsBallType;
 class USsGameInstance;

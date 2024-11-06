@@ -19,11 +19,11 @@ public:
     TMap<ESsColor, TObjectPtr<UMaterialInstance>> MaterialInstances;
     
     UPROPERTY(EditAnywhere, BlueprintReadOnly)
-    TSubclassOf<class ASsSphere> SphereClass;
+    TSubclassOf<class ASsBaseSphere> SphereClass;
 
     UPROPERTY(EditAnywhere, BlueprintReadOnly)
-    float CollisionDiameter;
+    float TargetCollisionDiameter;
 
     UPROPERTY(EditAnywhere, BlueprintReadOnly)
-    float MeshDiameter;
+    float TargetMeshDiameter;
 };

@@ -1,6 +1,6 @@
 #include "Player/SsPawn.h"
 
-#include "SsSphere.h"
+#include "Sphere/SsBaseSphere.h"
 #include "GameModes/SsGameLevelGameMode.h"
 
 #include "Engine/LocalPlayer.h"
