@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+
 #include "Sphere/SsBaseSphere.h"
 
 #include "Components/SphereComponent.h"
@@ -20,6 +22,17 @@ void ASsBaseSphere::Roll(const FVector& Impulse) const
     if (!SphereCollisionComponent) return;
     SphereCollisionComponent->AddImpulse(Impulse, NAME_None, true);
 }
+
+float ASsBaseSphere::GetMeshRadius() const
+{
+    return 0.0f;
+}
+
+void ASsBaseSphere::SetMeshScale(FVector Scale) {}
+
+void ASsBaseSphere::SetMaterial(UMaterialInstance* Material) {}
+
+void ASsBaseSphere::Kill() {}
 
 void ASsBaseSphere::TurnIntoRollBall() 
 {

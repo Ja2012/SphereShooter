@@ -1,4 +1,6 @@
-﻿#include "CoreTypes/SsTags.h"
+﻿// SPDX-License-Identifier: MIT
+
+#include "CoreTypes/SsTags.h"
 
 UE_DEFINE_GAMEPLAY_TAG(Tag_RollBallSpawn, "RollBallSpawn");
 UE_DEFINE_GAMEPLAY_TAG(Tag_CrossLine, "CrossLine");

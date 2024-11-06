@@ -1,4 +1,4 @@
-// LICENSE.md
+// SPDX-License-Identifier: MIT
 
 #include "UI/GameLevel/SsGameLevelWidget.h"
 

@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+
 #include "GameModes/SsGameLevelGameMode.h"
 
 #include "CoreTypes/SsBallType.h"

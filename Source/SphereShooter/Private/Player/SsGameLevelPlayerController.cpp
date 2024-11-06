@@ -1,4 +1,4 @@
-// LICENSE.md
+// SPDX-License-Identifier: MIT
 
 #include "Player/SsGameLevelPlayerController.h"
 #include "UI/GameLevel/SsGameLevelHUD.h"

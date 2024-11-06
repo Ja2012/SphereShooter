@@ -1,4 +1,4 @@
-// LICENSE.md
+// SPDX-License-Identifier: MIT
 
 #include "GameModes/SsMainMenuGameMode.h"
 

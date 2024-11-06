@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+
 #pragma once
 
 #include "CoreTypes/SsColor.h"
@@ -10,7 +12,7 @@
 struct FSsTile;
 class USphereComponent;
 
-UCLASS(Abstract)
+UCLASS()
 class SPHERESHOOTER_API ASsBaseSphere : public AActor
 {
     GENERATED_BODY()
@@ -21,10 +23,10 @@ public:
     void TurnIntoGridBall();
     void Roll(const FVector& Impulse) const;
 
-    virtual float GetMeshRadius() const = 0;
-    virtual void SetMeshScale(FVector Scale) = 0;
-    virtual void SetMaterial(UMaterialInstance* Material) = 0;
-    virtual void Kill() = 0;
+    virtual float GetMeshRadius() const;
+    virtual void SetMeshScale(FVector Scale);
+    virtual void SetMaterial(UMaterialInstance* Material);
+    virtual void Kill();
 
     UPROPERTY(VisibleAnywhere)
     TObjectPtr<USphereComponent> SphereCollisionComponent;

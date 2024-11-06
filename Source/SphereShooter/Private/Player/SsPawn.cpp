@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+
 #include "Player/SsPawn.h"
 
 #include "Sphere/SsBaseSphere.h"

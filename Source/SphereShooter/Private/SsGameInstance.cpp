@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+
 #include "SsGameInstance.h"
 #include "CoreTypes/SsSaveGame.h"
 
