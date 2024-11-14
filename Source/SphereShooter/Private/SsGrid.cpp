@@ -8,6 +8,7 @@
 #include "GeometryCollection/GeometryCollectionComponent.h"
 
 #include <unordered_map>
+#include <queue>
 
 DEFINE_LOG_CATEGORY_STATIC(ASSGridLog, All, All);
 

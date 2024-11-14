@@ -1,1 +1,0 @@
-"C:\Program Files\Epic Games\UE_5.3\Engine\Binaries\DotNET\\UnrealBuildTool\UnrealBuildTool.exe"  -projectfiles -project="C:\Source\00_UnrealEngine\\SphereShooter\\SphereShooter.uproject" -VSCode -game -rocket -progress

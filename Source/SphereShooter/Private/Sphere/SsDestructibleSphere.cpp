@@ -5,6 +5,7 @@
 
 #include "Components/SphereComponent.h"
 #include "GeometryCollection/GeometryCollectionComponent.h"
+#include "TimerManager.h"
 
 ASsDestructibleSphere::ASsDestructibleSphere()
 {
@@ -16,7 +17,7 @@ ASsDestructibleSphere::ASsDestructibleSphere()
 
 float ASsDestructibleSphere::GetMeshRadius() const
 {
-    return GeometryCollectionComponent->CalcBounds(FTransform()).GetBox().GetExtent().X;
+    return GeometryCollectionComponent->GetLocalBounds().GetExtent().X;
 }
 
 void ASsDestructibleSphere::SetMeshScale(FVector Scale)
@@ -31,7 +32,14 @@ void ASsDestructibleSphere::SetMaterial(UMaterialInstance* Material)
 
 void ASsDestructibleSphere::Kill()
 {
-    GeometryCollectionComponent->SetSimulatePhysics(false);
-    GeometryCollectionComponent->Deactivate();
-    Destroy();
+    // TODO WIP
+
+
+    //GeometryCollectionComponent->SetSimulatePhysics(true);
+    //GeometryCollectionComponent->AddImpulse();
+    //GeometryCollectionComponent->AddForce(FVector(0.f, 0.f, 3000.f));
+
+    //FTimerHandle _;
+    GetWorld()->GetTimerManager().SetTimer(_, this, &ASsDestructibleSphere::K2_DestroyActor, 5.f);
+    //Destroy();
 }

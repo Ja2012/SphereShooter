@@ -7,6 +7,8 @@
 #include "CoreMinimal.h"
 #include "GameFramework/GameModeBase.h"
 
+#include <unordered_set>
+
 #include "SsGameLevelGameMode.generated.h"
 
 class ASsGameLevelHUD;

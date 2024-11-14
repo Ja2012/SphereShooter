@@ -293,11 +293,14 @@ void ASsGameLevelGameMode::GameOver()
 
 void ASsGameLevelGameMode::SetBallCDO() const
 {
+    ASsBaseSphere* Ball = Cast<ASsBaseSphere>(GetWorld()->SpawnActor(BallType->SphereClass));
+    const float MeshRadius = Ball->GetMeshRadius();
+    Ball->Kill();
+
     ASsBaseSphere* BallCDO = Cast<ASsBaseSphere>(BallType->SphereClass->GetDefaultObject()); 
 
     BallCDO->SphereCollisionComponent->SetSphereRadius(BallType->TargetCollisionDiameter / 2.f);
 
-    const float MeshRadius = BallCDO->GetMeshRadius();
     const float BallRadius = BallType->TargetMeshDiameter / 2.f;
     const float MeshScale = BallRadius / MeshRadius;
     BallCDO->SetMeshScale(FVector(MeshScale));
