@@ -40,6 +40,6 @@ void ASsDestructibleSphere::Kill()
     //GeometryCollectionComponent->AddForce(FVector(0.f, 0.f, 3000.f));
 
     //FTimerHandle _;
-    GetWorld()->GetTimerManager().SetTimer(_, this, &ASsDestructibleSphere::K2_DestroyActor, 5.f);
-    //Destroy();
+    //GetWorld()->GetTimerManager().SetTimer(_, this, &ASsDestructibleSphere::K2_DestroyActor, 5.f);
+    Destroy();
 }
